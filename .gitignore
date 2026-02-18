@@ -1,0 +1,21 @@
+# Compiled files
+target/
+*.class
+
+# IDE files
+.vscode/
+.settings/
+.project
+.classpath
+*.iml
+.idea/
+
+# Logs
+*.log
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Maven specific
+dependency-reduced-pom.xml
