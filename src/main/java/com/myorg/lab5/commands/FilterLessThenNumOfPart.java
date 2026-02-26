@@ -3,22 +3,23 @@ package com.myorg.lab5.commands;
 import com.myorg.lab5.io.ConsoleManager;
 import com.myorg.lab5.model.CollectionManager;
 
-public class ShowCommand implements Command{
-    private CollectionManager collectionManager;
-    private ConsoleManager consoleManager;
 
-    public ShowCommand(CollectionManager collectionManager, ConsoleManager consoleManager){
+public class FilterLessThenNumOfPart implements Command{
+    private CollectionManager collectionManager;
+    private final ConsoleManager consoleManager;
+
+    public FilterLessThenNumOfPart(CollectionManager collectionManager, ConsoleManager consoleManager){
         this.collectionManager = collectionManager;
         this.consoleManager = consoleManager;
     }
 
     @Override
     public void execute(String args[]){
-        consoleManager.show(collectionManager.showElements());
+        consoleManager.show(collectionManager.filterLessThanNumbOfParticipants(Integer.parseInt(args[0])).toString());
     }
 
     @Override
     public String getDescription(){
-        return "- Show all elements in the collection";
+        return "- Show elements with participants < N";
     }
 }

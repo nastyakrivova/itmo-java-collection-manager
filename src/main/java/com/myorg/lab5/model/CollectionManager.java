@@ -1,13 +1,15 @@
 package com.myorg.lab5.model;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 
-import io.FileManager;
+import com.myorg.lab5.io.FileManager;
 
 public class CollectionManager {
     private ArrayList<MusicBand> list;
     private FileManager fileManager;
+    private final LocalDate initDate;
 
     //подается какой-то рандомный тип данных и он его в сит оборачивает?
     //существует два способа: из скрипта и из консоли ручками, но это на уровень выше важно
@@ -15,6 +17,7 @@ public class CollectionManager {
     public CollectionManager(){
         this.list = new ArrayList<MusicBand>();
         this.fileManager = new FileManager("data.csv");
+        this.initDate = LocalDate.now();
     }
 
     public void add(MusicBand musicBand){
@@ -70,5 +73,31 @@ public class CollectionManager {
             }
         }
         return result;
+    }
+
+    public String showElements(){
+        if (list.isEmpty()) {
+        return "Collection is empty";
+        }
+    
+        StringBuilder sb = new StringBuilder();
+        for (MusicBand band : list) {
+            sb.append(band.toString()).append("\n");
+        }
+        return sb.toString();
+    }
+
+    public ArrayList<MusicBand> getList(){
+        return list;
+    }
+
+    @Override
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+        sb.append("Collection Information\n");
+        sb.append(String.format("Implementation: %s\n", list.getClass().getName()));
+        sb.append(String.format("Initialization date: %s\n", initDate));
+        sb.append(String.format("Elements count: %d\n", list.size()));
+        return sb.toString();
     }
 }

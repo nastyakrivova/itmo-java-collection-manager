@@ -2,23 +2,24 @@ package com.myorg.lab5.commands;
 
 import com.myorg.lab5.io.ConsoleManager;
 import com.myorg.lab5.model.CollectionManager;
+import com.myorg.lab5.model.Studio;
 
-public class InfoCommand implements Command{
+public class CountByStudioCommand implements Command {
     private CollectionManager collectionManager;
     private final ConsoleManager consoleManager;
 
-    public InfoCommand(CollectionManager collectionManager, ConsoleManager consoleManager){
+    public CountByStudioCommand(CollectionManager collectionManager, ConsoleManager consoleManager){
         this.collectionManager = collectionManager;
         this.consoleManager = consoleManager;
     }
 
     @Override
     public void execute(String args[]){
-        consoleManager.show(collectionManager.toString());
+        consoleManager.show(String.valueOf(collectionManager.countByStudio(new Studio(args[0]))));
     }
 
     @Override
     public String getDescription(){
-        return "- Show collection information (type, initialization date, size)";
+        return "- Count elements with the specified studio";
     }
 }
