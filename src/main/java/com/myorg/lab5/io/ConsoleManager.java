@@ -1,18 +1,29 @@
 package com.myorg.lab5.io;
 
+import java.util.Scanner;
+
 import com.myorg.lab5.model.MusicBand;
-import com.myorg.lab5.utils.MusicBandParser;
+import com.myorg.lab5.utils.ConsoleParser;
 
 public class ConsoleManager {
-    private MusicBandParser parser;
+    private ConsoleParser parser;
+    private Scanner scanner;
+
+    public ConsoleManager(){
+        this.scanner = new Scanner(System.in);
+    }
 
     public void show(String message){
         System.out.println(message);
     }
 
+    public String read(){
+        System.out.println(">");;
+        return scanner.nextLine();
+    }
+
     public MusicBand parse(){
-        parser.parse();
-        return ...;
+        return parser.parse();
     }
 
 

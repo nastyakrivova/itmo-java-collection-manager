@@ -1,5 +1,6 @@
 package com.myorg.lab5.model;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -37,7 +38,12 @@ public class CollectionManager {
     }
 
     public void save(){
-        fileManager.save(list);
+        try{
+            fileManager.save(list);
+        }catch(IOException e){
+        
+        }
+        
     }
 
     public void addIfMin(MusicBand musicBand){

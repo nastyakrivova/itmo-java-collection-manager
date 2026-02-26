@@ -1,12 +1,18 @@
 package com.myorg.lab5.utils;
 
 
+import com.myorg.lab5.model.MusicBand;
+
 public class ScriptParser{
     public ScriptParser(){
 
     }
 
-    public void parse(String fileName){
+    public MusicBand parse(String fileName){
+        return
+    }
 
+    public String toCsv(MusicBand musicBand){
+        return "djhf";
     }
 }
