@@ -23,8 +23,13 @@ public class ConsoleManager {
     }
 
     public MusicBand parse(){
-        return parser.parse();
+        try{
+            return parser.parse();
+        } catch(Exception e) {
+            System.err.println("Error parsing line: " + e.getMessage());
+            return null;
+        }
+        
     }
-
 
 }
