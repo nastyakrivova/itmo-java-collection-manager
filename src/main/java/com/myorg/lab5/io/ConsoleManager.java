@@ -11,6 +11,7 @@ public class ConsoleManager {
 
     public ConsoleManager(){
         this.scanner = new Scanner(System.in);
+        this.parser = new ConsoleParser();
     }
 
     public void show(String message){
@@ -18,7 +19,7 @@ public class ConsoleManager {
     }
 
     public String read(){
-        System.out.println(">");;
+        System.out.print(">");;
         return scanner.nextLine();
     }
 

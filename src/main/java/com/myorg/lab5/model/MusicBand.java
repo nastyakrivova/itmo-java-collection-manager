@@ -111,17 +111,21 @@ public class MusicBand implements Comparable<MusicBand>{
 
     @Override
     public String toString() {
-        return "MusicBand{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", coordinates=" + coordinates +
-                ", creationDate=" + creationDate +
-                ", numberOfParticipants=" + numberOfParticipants +
-                ", singlesCount=" + singlesCount +
-                ", albumsCount=" + albumsCount +
-                ", genre=" + genre +
-                ", studio=" + studio +
-                '}';
+        return String.format("[%d] %s | Участников: %d | Альбомов: %d | Жанр: %s | Студия: %s",
+            id, name, numberOfParticipants, albumsCount, genre,
+            studio != null ? studio.getName() : "не указана");
+
+        // return "MusicBand{" +
+        //         "id=" + id +
+        //         ", name='" + name + '\'' +
+        //         ", coordinates=" + coordinates +
+        //         ", creationDate=" + creationDate +
+        //         ", numberOfParticipants=" + numberOfParticipants +
+        //         ", singlesCount=" + singlesCount +
+        //         ", albumsCount=" + albumsCount +
+        //         ", genre=" + genre +
+        //         ", studio=" + studio +
+        //         '}';
     }
 
     @Override

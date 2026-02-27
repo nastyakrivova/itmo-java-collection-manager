@@ -28,6 +28,7 @@ import com.myorg.lab5.utils.ScriptParser;
 
 
 public class App {
+
     public static void main(String[] args) {
 
         String fileName = System.getenv("DATA");
@@ -51,7 +52,7 @@ public class App {
             consoleManager.show("Starting with empty collection");
         }
 
-
+        //Регистрация команд
         commandManager.register("add", new AddCommand(collectionManager, consoleManager));
         commandManager.register("add_if_min", new AddIfMinCommand(collectionManager, consoleManager));
         commandManager.register("help", new HelpCommand(commandManager));
