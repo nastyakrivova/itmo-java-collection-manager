@@ -1,7 +1,6 @@
 package com.myorg.lab5.commands;
 
-// conected to command manager
-// обращается через менеджер команд через мапу к команде getDescription
+
 public class HelpCommand implements Command{
     private final CommandManager commandManager;
     public HelpCommand(CommandManager commandManager){

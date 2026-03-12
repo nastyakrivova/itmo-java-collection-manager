@@ -5,16 +5,16 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 
+import com.myorg.lab5.io.ConsoleManager;
 import com.myorg.lab5.io.FileManager;
 
 public class CollectionManager {
     private ArrayList<MusicBand> list;
     private FileManager fileManager;
     private final LocalDate initDate;
+    private ConsoleManager consoleManager;
 
-    //подается какой-то рандомный тип данных и он его в сит оборачивает?
-    //существует два способа: из скрипта и из консоли ручками, но это на уровень выше важно
-    //ничего не передается при создании, оно само создается, а потом заполняется
+  
     public CollectionManager(){
         this.list = new ArrayList<MusicBand>();
         this.fileManager = new FileManager("data.csv");
@@ -41,7 +41,8 @@ public class CollectionManager {
         try{
             fileManager.save(list);
         }catch(IOException e){
-        
+            consoleManager.show("error saving file");
+            e.printStackTrace();
         }
         
     }
@@ -64,7 +65,7 @@ public class CollectionManager {
     public int countByStudio(Studio studio){
         int count = 0;
         for (MusicBand musicBand : list) {
-            if(musicBand.getStudio() == studio){
+            if(musicBand.getStudio() != null && musicBand.getStudio().equals(studio)){
                 count += 1;
             }
         }
@@ -74,7 +75,7 @@ public class CollectionManager {
     public ArrayList<MusicBand> filterLessThanNumbOfParticipants(int numberOfParticipants){
         ArrayList<MusicBand> result = new ArrayList<MusicBand>();
         for (MusicBand musicBand : list) {
-            if (musicBand.getNumberOfParticipants() == numberOfParticipants){
+            if (musicBand.getNumberOfParticipants() < numberOfParticipants){
                 result.add(musicBand);
             }
         }

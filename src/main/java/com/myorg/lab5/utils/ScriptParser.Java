@@ -12,7 +12,7 @@ public class ScriptParser{
     }
 
     public MusicBand parse(String line){
-        String[] data = line.split(",");
+        String[] data = line.split(",", -1);
 
         if (data.length < 8) {
             throw new IllegalArgumentException("Not enough fields in CSV line");

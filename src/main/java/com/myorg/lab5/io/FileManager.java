@@ -51,7 +51,7 @@ public class FileManager{
             String[] lines = data.split("\n");
 
             for (String line : lines) {
-                line.trim();
+                line = line.trim();
                 if(line.isEmpty()){ continue; }
 
                 try{
@@ -59,6 +59,7 @@ public class FileManager{
                     bandList.add(band);
                 }catch(Exception e){
                     System.err.println("Error parsing line: " + line);
+                    System.err.println("CAUSE: " + e.getMessage());
                 }
                 
             }

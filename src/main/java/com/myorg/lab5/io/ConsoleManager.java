@@ -23,6 +23,14 @@ public class ConsoleManager {
         return scanner.nextLine();
     }
 
+    public void enableScriptMode(Scanner scriptScanner) {
+        parser.setScriptMode(scriptScanner);
+    }
+
+    public void disableScriptMode() {
+        parser.setConsoleMode();
+    }
+
     public MusicBand parse(){
         try{
             return parser.parse();

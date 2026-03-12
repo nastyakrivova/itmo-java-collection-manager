@@ -24,9 +24,16 @@ import com.myorg.lab5.io.ConsoleManager;
 import com.myorg.lab5.io.FileManager;
 import com.myorg.lab5.model.CollectionManager;
 import com.myorg.lab5.model.MusicBand;
-import com.myorg.lab5.utils.ScriptParser;
 
 
+/**
+ * Главный класс приложения для управления коллекцией MusicBand.
+ * При запуске загружает данные из CSV файла, указанного в переменной окружения DATA.
+ * Предоставляет интерактивный интерфейс для управления коллекцией.
+ * 
+ * @author Кривова Анастасия
+ * @version 1.0
+ */
 public class App {
 
     public static void main(String[] args) {
@@ -40,8 +47,7 @@ public class App {
         CommandManager commandManager = new CommandManager();
         CollectionManager collectionManager = new CollectionManager();
         ConsoleManager consoleManager = new ConsoleManager();
-        ScriptParser scriptParser = new ScriptParser();
-
+       
         try{
             Collection<MusicBand> collection = fileManager.load();
             for (MusicBand band : collection) {
@@ -68,7 +74,7 @@ public class App {
         commandManager.register("remove_greater", new RemoveGreaterCommand(collectionManager, consoleManager));
         commandManager.register("remove_lower", new RemoveLowerCommand(collectionManager, consoleManager));
         commandManager.register("remove_by_id", new RemoveById(collectionManager));
-        commandManager.register("execute_script", new ExecuteScriptCommand(scriptParser));
+        commandManager.register("execute_script", new ExecuteScriptCommand(commandManager, consoleManager));
         
         while(true){
             String input = consoleManager.read();
