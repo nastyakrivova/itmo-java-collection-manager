@@ -3,6 +3,10 @@ package com.myorg.lab5.commands;
 import com.myorg.lab5.io.ConsoleManager;
 import com.myorg.lab5.model.CollectionManager;
 
+/**
+ * Команда вывода всех элементов коллекции.
+ * Отображает все элементы в их строковом представлении.
+ */
 public class ShowCommand implements Command{
     private CollectionManager collectionManager;
     private ConsoleManager consoleManager;

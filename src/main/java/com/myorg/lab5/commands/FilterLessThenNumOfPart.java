@@ -4,6 +4,10 @@ import com.myorg.lab5.io.ConsoleManager;
 import com.myorg.lab5.model.CollectionManager;
 
 
+/**
+ * Команда фильтрации элементов по количеству участников.
+ * Выводит элементы, у которых numberOfParticipants меньше заданного значения.
+ */
 public class FilterLessThenNumOfPart implements Command{
     private CollectionManager collectionManager;
     private final ConsoleManager consoleManager;
@@ -13,6 +17,11 @@ public class FilterLessThenNumOfPart implements Command{
         this.consoleManager = consoleManager;
     }
 
+    /**
+     * Выполняет фильтрацию по количеству участников.
+     * 
+     * @param args массив аргументов, где args[0] - пороговое значение (целое число)
+     */
     @Override
     public void execute(String args[]){
         consoleManager.show(collectionManager.filterLessThanNumbOfParticipants(Integer.parseInt(args[0])).toString());

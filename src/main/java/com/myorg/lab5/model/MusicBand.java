@@ -3,6 +3,12 @@ package com.myorg.lab5.model;
 import java.time.LocalDate;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Класс музыкальной группы.
+ * Содержит всю информацию о группе: название, координаты, дату создания,
+ * количество участников, количество альбомов, жанр, студию.
+ * Реализует Comparable для сортировки по умолчанию.
+ */
 public class MusicBand implements Comparable<MusicBand>{
     private static final AtomicInteger generator = new AtomicInteger(1);
 
@@ -115,10 +121,21 @@ public class MusicBand implements Comparable<MusicBand>{
             id, name, numberOfParticipants, albumsCount, genre,
             studio != null ? studio.getName() : "не указана");
 
+        // return "MusicBand{" +
+        //         "id=" + id +
+        //         ", name='" + name + '\'' +
+        //         ", coordinates=" + coordinates +
+        //         ", creationDate=" + creationDate +
+        //         ", numberOfParticipants=" + numberOfParticipants +
+        //         ", singlesCount=" + singlesCount +
+        //         ", albumsCount=" + albumsCount +
+        //         ", genre=" + genre +
+        //         ", studio=" + studio +
+        //         '}';
     }
 
     @Override
     public int compareTo(MusicBand other) {
-        return Integer.compare(this.numberOfParticipants, other.numberOfParticipants);
+        return this.name.compareTo(other.name);
     }
 }

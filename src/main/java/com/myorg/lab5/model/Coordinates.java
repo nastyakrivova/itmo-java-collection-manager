@@ -1,5 +1,9 @@
 package com.myorg.lab5.model;
 
+/**
+ * Класс координат группы.
+ * Содержит координаты X и Y с валидацией значений.
+ */
 public class Coordinates {
     private int x;
     private Integer y;

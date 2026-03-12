@@ -6,11 +6,23 @@ import com.myorg.lab5.model.MusicBand;
 import com.myorg.lab5.model.MusicGenre;
 import com.myorg.lab5.model.Studio;
 
+/**
+ * Парсер для работы с CSV форматом.
+ * Преобразует объекты MusicBand в CSV строки и обратно.
+ * Используется для загрузки и сохранения коллекции в файл.
+ */
 public class ScriptParser{
     public ScriptParser(){
-
     }
 
+    /**
+     * Парсит CSV строку в объект MusicBand.
+     * Формат строки: name,x,y,participants,albums,genre,studio,singles
+     * 
+     * @param line CSV строка для парсинга
+     * @return объект MusicBand
+     * @throws IllegalArgumentException если строка имеет неверный формат
+     */
     public MusicBand parse(String line){
         String[] data = line.split(",", -1);
 

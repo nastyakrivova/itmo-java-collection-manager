@@ -27,12 +27,16 @@ import com.myorg.lab5.model.MusicBand;
 
 
 /**
- * Главный класс приложения для управления коллекцией MusicBand.
- * При запуске загружает данные из CSV файла, указанного в переменной окружения DATA.
- * Предоставляет интерактивный интерфейс для управления коллекцией.
+ * Главный класс приложения.
+ * Точка входа в программу управления коллекцией MusicBand.
  * 
- * @author Кривова Анастасия
- * @version 1.0
+ * <p>При запуске:
+ * <ol>
+ *   <li>Читает имя файла из переменной окружения DATA</li>
+ *   <li>Загружает коллекцию из CSV файла (если существует)</li>
+ *   <li>Регистрирует все доступные команды</li>
+ *   <li>Запускает интерактивный режим ввода команд</li>
+ * </ol>
  */
 public class App {
 
@@ -47,7 +51,8 @@ public class App {
         CommandManager commandManager = new CommandManager();
         CollectionManager collectionManager = new CollectionManager();
         ConsoleManager consoleManager = new ConsoleManager();
-       
+
+
         try{
             Collection<MusicBand> collection = fileManager.load();
             for (MusicBand band : collection) {

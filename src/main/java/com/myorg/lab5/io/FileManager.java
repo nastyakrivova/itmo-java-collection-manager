@@ -12,6 +12,11 @@ import java.util.List;
 import com.myorg.lab5.model.MusicBand;
 import com.myorg.lab5.utils.ScriptParser;
 
+/**
+ * Менеджер файлового ввода-вывода.
+ * Отвечает за сохранение и загрузку коллекции в/из CSV файла.
+ * Использует BufferedInputStream и BufferedOutputStream согласно требованиям.
+ */
 public class FileManager{
     private String fileName;
     private ScriptParser parser;
@@ -21,6 +26,14 @@ public class FileManager{
         this.parser = new ScriptParser();
     }
 
+    /**
+     * Сохраняет коллекцию в файл в формате CSV.
+     * Каждый элемент коллекции преобразуется в CSV строку и записывается в файл.
+     * 
+     * @param collection коллекция MusicBand для сохранения
+     * @throws IOException если возникает ошибка ввода-вывода
+     *         (нет прав на запись, диск переполнен, файл заблокирован)
+     */
     public void save(Collection<MusicBand> collection) throws IOException{
         
         FileOutputStream fos = new FileOutputStream(fileName);
@@ -40,6 +53,15 @@ public class FileManager{
 
     }
 
+    /**
+     * Загружает коллекцию из CSV файла.
+     * Читает файл построчно, парсит каждую строку в объект MusicBand.
+     * Пропускает пустые строки и строки с ошибками.
+     * 
+     * @return коллекция загруженных MusicBand
+     * @throws IOException если возникает ошибка ввода-вывода
+     *         (файл не найден, нет прав на чтение)
+     */
     public Collection<MusicBand> load() throws IOException{
         List<MusicBand> bandList = new ArrayList<>();
 
@@ -51,7 +73,7 @@ public class FileManager{
             String[] lines = data.split("\n");
 
             for (String line : lines) {
-                line = line.trim();
+                line.trim();
                 if(line.isEmpty()){ continue; }
 
                 try{
@@ -59,7 +81,6 @@ public class FileManager{
                     bandList.add(band);
                 }catch(Exception e){
                     System.err.println("Error parsing line: " + line);
-                    System.err.println("CAUSE: " + e.getMessage());
                 }
                 
             }

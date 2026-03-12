@@ -8,10 +8,20 @@ import com.myorg.lab5.io.ConsoleManager;
 import com.myorg.lab5.model.CollectionManager;
 import com.myorg.lab5.model.MusicBand;
 
+/**
+ * Команда вывода элементов в порядке убывания.
+ * Сортирует коллекцию в обратном порядке и выводит все элементы.
+ */
 public class PrintDescendingCommand implements Command{
     private CollectionManager collectionManager;
     private final ConsoleManager consoleManager;
 
+    /**
+     * Создает команду print_descending.
+     * 
+     * @param collectionManager менеджер коллекции для получения элементов
+     * @param console консольный менеджер для вывода
+     */
     public PrintDescendingCommand(CollectionManager collectionManager, ConsoleManager consoleManager){
         this.collectionManager = collectionManager;
         this.consoleManager = consoleManager;

@@ -6,6 +6,11 @@ import com.myorg.lab5.model.MusicBand;
 import com.myorg.lab5.model.MusicGenre;
 import com.myorg.lab5.model.Studio;
 
+/**
+ * Парсер для ввода данных музыкальной группы из консоли или скрипта.
+ * Обеспечивает валидацию ввода и повторные попытки при ошибках.
+ * Поддерживает два режима: консольный (с подсказками) и скриптовый (без подсказок).
+ */
 public class ConsoleParser {
     private Scanner consoleScanner;
     private Scanner scriptScanner;
@@ -15,16 +20,31 @@ public class ConsoleParser {
         this.consoleScanner = new Scanner(System.in);
     }
 
+    /**
+     * Включает режим чтения из скрипта.
+     * 
+     * @param scriptScanner сканер для чтения из файла скрипта
+     */
     public void setScriptMode(Scanner scriptScanner) {
         this.scriptMode = true;
         this.scriptScanner = scriptScanner;
     }
 
+    /**
+     * Выключает режим скрипта, возвращается к консольному вводу.
+     */
     public void setConsoleMode() {
         this.scriptMode = false;
         this.scriptScanner = null;
     }
 
+
+    /**
+     * Парсит данные музыкальной группы.
+     * В зависимости от режима использует консольный или скриптовый ввод.
+     * 
+     * @return объект MusicBand или null в случае ошибки
+     */
     public MusicBand parse() {
         if (scriptMode) {
             return parseFromScript();
