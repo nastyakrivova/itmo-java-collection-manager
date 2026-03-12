@@ -12,8 +12,6 @@ public class ExitCommand implements Command{
     /**
      * Выполняет команду завершения программы.
      * Выводит сообщение и вызывает {@link System#exit(int)}.
-     *
-     * @param args аргументы команды (не используются)
      */
     @Override
     public void execute(String[] args) {

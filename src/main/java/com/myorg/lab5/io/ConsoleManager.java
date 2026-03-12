@@ -18,11 +18,23 @@ public class ConsoleManager {
         System.out.println(message);
     }
 
+
+    /**
+     * Читает строку из консоли.
+     * Выводит приглашение ">" перед вводом.
+     * 
+     * @return введенная пользователем строка
+     */
     public String read(){
         System.out.print(">");;
         return scanner.nextLine();
     }
 
+    /**
+     * Парсит ввод пользователя в объект MusicBand.
+     * 
+     * @return объект MusicBand или null в случае ошибки
+     */
     public MusicBand parse(){
         try{
             return parser.parse();
