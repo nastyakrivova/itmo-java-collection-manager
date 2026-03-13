@@ -19,3 +19,27 @@ Thumbs.db
 
 # Maven specific
 dependency-reduced-pom.xml
+
+# Файлы с данными
+test1.csv
+test1.txt
+test2.txt
+test3.txt
+test4.txt
+test5.txt
+data.csv
+
+# Документы
+*.docx
+*.puml
+*.pdf
+Кривова отчет лаб5.docx
+Лабораторная1_Кривова.docx
+uml.puml
+
+# IDEA
+.idea/
+*.iml
+
+# Сборка
+target/
