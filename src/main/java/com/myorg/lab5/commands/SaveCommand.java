@@ -1,5 +1,6 @@
 package com.myorg.lab5.commands;
 
+import com.myorg.lab5.io.ConsoleManager;
 import com.myorg.lab5.model.CollectionManager;
 
 /**
@@ -9,14 +10,21 @@ import com.myorg.lab5.model.CollectionManager;
  */
 public class SaveCommand implements Command{
     private CollectionManager collectionManager;
+    private ConsoleManager consoleManager;
 
-    public SaveCommand(CollectionManager collectionManager){
+    public SaveCommand(CollectionManager collectionManager, ConsoleManager consoleManager){
         this.collectionManager = collectionManager;
+        this.consoleManager = consoleManager;
     }
 
     @Override
     public void execute(String args[]){
-        collectionManager.save();
+        boolean saved = collectionManager.save();
+        if (saved) {
+            consoleManager.show("Collection saved successfully");
+        } else {
+            consoleManager.show("Error saving collection");
+        }
     }
 
     @Override

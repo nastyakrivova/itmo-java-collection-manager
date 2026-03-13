@@ -93,6 +93,14 @@
                 <docencoding>UTF-8</docencoding>
             </configuration>
         </plugin>
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>3.1.0</version>
+            <configuration>
+                <mainClass>com.myorg.lab5.App</mainClass>
+            </configuration>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>

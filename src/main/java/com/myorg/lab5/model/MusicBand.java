@@ -120,22 +120,10 @@ public class MusicBand implements Comparable<MusicBand>{
         return String.format("[%d] %s | Участников: %d | Альбомов: %d | Жанр: %s | Студия: %s",
             id, name, numberOfParticipants, albumsCount, genre,
             studio != null ? studio.getName() : "не указана");
-
-        // return "MusicBand{" +
-        //         "id=" + id +
-        //         ", name='" + name + '\'' +
-        //         ", coordinates=" + coordinates +
-        //         ", creationDate=" + creationDate +
-        //         ", numberOfParticipants=" + numberOfParticipants +
-        //         ", singlesCount=" + singlesCount +
-        //         ", albumsCount=" + albumsCount +
-        //         ", genre=" + genre +
-        //         ", studio=" + studio +
-        //         '}';
     }
 
     @Override
     public int compareTo(MusicBand other) {
-        return this.name.compareTo(other.name);
+        return Integer.compare(this.albumsCount, other.albumsCount);
     }
 }

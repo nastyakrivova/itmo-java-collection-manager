@@ -1,5 +1,6 @@
 package com.myorg.lab5.commands;
 
+import com.myorg.lab5.io.ConsoleManager;
 import com.myorg.lab5.model.CollectionManager;
 
 /**
@@ -8,9 +9,11 @@ import com.myorg.lab5.model.CollectionManager;
  */
 public class RemoveById implements Command{
     private final CollectionManager collectionManager;
+    private ConsoleManager consoleManager;
 
-    public RemoveById(CollectionManager collectionManager){
+    public RemoveById(CollectionManager collectionManager, ConsoleManager consoleManager){
         this.collectionManager = collectionManager;
+        this.consoleManager = consoleManager;
     }
     
     /**
@@ -20,7 +23,18 @@ public class RemoveById implements Command{
      */
     @Override
     public void execute(String[] args){
-        collectionManager.removeById(Integer.parseInt(args[0]));
+        try {
+            int id = Integer.parseInt(args[0]);
+            boolean removed = collectionManager.removeById(id);
+            
+            if (removed) {
+                consoleManager.show("Element with id " + id + " removed successfully");
+            } else {
+                consoleManager.show("Element with id " + id + " not found");
+            }
+        } catch (NumberFormatException e) {
+            consoleManager.show("Error: ID must be a number");
+        }
     }
 
     @Override

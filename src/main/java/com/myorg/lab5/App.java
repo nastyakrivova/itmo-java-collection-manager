@@ -70,7 +70,7 @@ public class App {
         commandManager.register("info", new InfoCommand(collectionManager, consoleManager));
         commandManager.register("show", new ShowCommand(collectionManager, consoleManager));
         commandManager.register("clear", new ClearCommand(collectionManager));
-        commandManager.register("save", new SaveCommand(collectionManager));
+        commandManager.register("save", new SaveCommand(collectionManager, consoleManager));
         commandManager.register("exit", new ExitCommand(consoleManager));
         commandManager.register("count_by_studio", new CountByStudioCommand(collectionManager, consoleManager));
         commandManager.register("filter_less_than_number_of_participants", new FilterLessThenNumOfPart(collectionManager, consoleManager));
@@ -78,7 +78,7 @@ public class App {
         commandManager.register("update", new UpdateIdCommand(collectionManager, consoleManager));
         commandManager.register("remove_greater", new RemoveGreaterCommand(collectionManager, consoleManager));
         commandManager.register("remove_lower", new RemoveLowerCommand(collectionManager, consoleManager));
-        commandManager.register("remove_by_id", new RemoveById(collectionManager));
+        commandManager.register("remove_by_id", new RemoveById(collectionManager, consoleManager));
         commandManager.register("execute_script", new ExecuteScriptCommand(commandManager, consoleManager));
         
         while(true){

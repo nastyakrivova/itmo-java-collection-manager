@@ -50,8 +50,8 @@ public class CollectionManager {
      * 
      * @param id индекс удаляемого элемента
      */
-    public void removeById(int id){
-        list.remove(id);
+    public boolean removeById(int id){
+        return list.removeIf(band -> band.getId() == id);
     }
 
     /**
@@ -65,13 +65,13 @@ public class CollectionManager {
      * Сохраняет коллекцию в файл.
      * Обрабатывает возможные ошибки ввода-вывода.
      */
-    public void save(){
-        try{
+    public boolean save() {
+        try {
             fileManager.save(list);
-        }catch(IOException e){
-        
+            return true;
+        } catch(IOException e) {
+            return false;
         }
-        
     }
 
     /**
