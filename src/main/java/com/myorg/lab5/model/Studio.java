@@ -1,6 +1,9 @@
 package com.myorg.lab5.model;
 
-public class Studio {
+import java.io.Serializable;
+
+public class Studio implements Serializable{
+    private static final long serialVersionUID = 1L;
     private String name; 
 
     public Studio(String name){

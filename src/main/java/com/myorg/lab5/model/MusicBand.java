@@ -1,9 +1,11 @@
 package com.myorg.lab5.model;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class MusicBand implements Comparable<MusicBand>{
+public class MusicBand implements Comparable<MusicBand>, Serializable{
+    private static final long serialVersionUID = 1L;
     private static final AtomicInteger generator = new AtomicInteger(1);
 
     private Integer id;
