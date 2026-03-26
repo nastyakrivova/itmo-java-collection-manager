@@ -48,6 +48,15 @@ public class CollectionManager {
         
     }
 
+    public boolean containsId(Integer id){
+        for (MusicBand band : list) {
+            if (band.getId().equals(id)){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void addIfMin(MusicBand musicBand){
         list.sort(Comparator.naturalOrder());
         if (musicBand.compareTo(list.get(0)) < 0){
