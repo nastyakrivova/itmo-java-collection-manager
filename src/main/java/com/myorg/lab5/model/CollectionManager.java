@@ -3,7 +3,9 @@ package com.myorg.lab5.model;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Comparator;
+import java.util.stream.Collectors;
 
 import com.myorg.lab5.io.FileManager;
 
@@ -41,7 +43,7 @@ public class CollectionManager {
         try{
             fileManager.save(list);
         }catch(IOException e){
-        
+            e.getStackTrace();
         }
         
     }
@@ -62,35 +64,26 @@ public class CollectionManager {
     }
 
     public int countByStudio(Studio studio){
-        int count = 0;
-        for (MusicBand musicBand : list) {
-            if(musicBand.getStudio() == studio){
-                count += 1;
-            }
-        }
-        return count;
+        return (int)list.stream()
+            .filter(band -> studio.equals(band.getStudio()))
+            .count();
     }
 
-    public ArrayList<MusicBand> filterLessThanNumbOfParticipants(int numberOfParticipants){
-        ArrayList<MusicBand> result = new ArrayList<MusicBand>();
-        for (MusicBand musicBand : list) {
-            if (musicBand.getNumberOfParticipants() == numberOfParticipants){
-                result.add(musicBand);
-            }
-        }
-        return result;
+    public List<MusicBand> filterLessThanNumbOfParticipants(int numberOfParticipants){
+        return list.stream()
+            .filter(band -> band.getNumberOfParticipants() < numberOfParticipants)
+            .collect(Collectors.toList());
     }
 
     public String showElements(){
         if (list.isEmpty()) {
         return "Collection is empty";
         }
-    
-        StringBuilder sb = new StringBuilder();
-        for (MusicBand band : list) {
-            sb.append(band.toString()).append("\n");
-        }
-        return sb.toString();
+
+        return list.stream()
+            .sorted(Comparator.comparing(MusicBand::getName))
+            .map(MusicBand::toString)
+            .collect(Collectors.joining("\n"));
     }
 
     public ArrayList<MusicBand> getList(){

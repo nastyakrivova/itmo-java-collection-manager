@@ -49,6 +49,23 @@ public class CommandManager {
         return true;
     }
 
+    public boolean execute(String commandName, String[] args){
+        Command command = commands.get(commandName);
+        if (command == null) {
+            return false;
+        }
+        command.execute(args);
+        return true;
+    }
+
+    public String executeAndGetResult(String commanddName, String[] args) {
+        Command command = commands.get(commanddName);
+        if(command == null) {
+            return null;
+        }
+        return command.executeAndReturn(args);
+    }
+
     public void printHelp(){
         commands.forEach((name, command) -> System.out.println(name + " " + command.getDescription()));
     }

@@ -53,22 +53,22 @@ public class App {
         }
 
         //Регистрация команд
-        commandManager.register("add", new AddCommand(collectionManager, consoleManager));
-        commandManager.register("add_if_min", new AddIfMinCommand(collectionManager, consoleManager));
-        commandManager.register("help", new HelpCommand(commandManager));
-        commandManager.register("info", new InfoCommand(collectionManager, consoleManager));
-        commandManager.register("show", new ShowCommand(collectionManager, consoleManager));
-        commandManager.register("clear", new ClearCommand(collectionManager));
-        commandManager.register("save", new SaveCommand(collectionManager));
-        commandManager.register("exit", new ExitCommand(consoleManager));
-        commandManager.register("count_by_studio", new CountByStudioCommand(collectionManager, consoleManager));
-        commandManager.register("filter_less_than_number_of_participants", new FilterLessThenNumOfPart(collectionManager, consoleManager));
-        commandManager.register("print_descending", new PrintDescendingCommand(collectionManager, consoleManager));
-        commandManager.register("update", new UpdateIdCommand(collectionManager, consoleManager));
-        commandManager.register("remove_greater", new RemoveGreaterCommand(collectionManager, consoleManager));
-        commandManager.register("remove_lower", new RemoveLowerCommand(collectionManager, consoleManager));
-        commandManager.register("remove_by_id", new RemoveById(collectionManager));
-        commandManager.register("execute_script", new ExecuteScriptCommand(scriptParser));
+        // commandManager.register("add", new AddCommand(collectionManager, consoleManager));
+        // commandManager.register("add_if_min", new AddIfMinCommand(collectionManager, consoleManager));
+        // commandManager.register("help", new HelpCommand(commandManager));
+        // commandManager.register("info", new InfoCommand(collectionManager, consoleManager));
+        // commandManager.register("show", new ShowCommand(collectionManager, consoleManager));
+        // commandManager.register("clear", new ClearCommand(collectionManager));
+        // commandManager.register("save", new SaveCommand(collectionManager));
+        // commandManager.register("exit", new ExitCommand(consoleManager));
+        // commandManager.register("count_by_studio", new CountByStudioCommand(collectionManager, consoleManager));
+        // commandManager.register("filter_less_than_number_of_participants", new FilterLessThenNumOfPart(collectionManager, consoleManager));
+        // commandManager.register("print_descending", new PrintDescendingCommand(collectionManager, consoleManager));
+        // commandManager.register("update", new UpdateIdCommand(collectionManager, consoleManager));
+        // commandManager.register("remove_greater", new RemoveGreaterCommand(collectionManager, consoleManager));
+        // commandManager.register("remove_lower", new RemoveLowerCommand(collectionManager, consoleManager));
+        // commandManager.register("remove_by_id", new RemoveById(collectionManager));
+        // commandManager.register("execute_script", new ExecuteScriptCommand(scriptParser));
         
         while(true){
             String input = consoleManager.read();

@@ -3,8 +3,8 @@ package com.myorg.lab5.commands;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import com.myorg.lab5.io.ConsoleManager;
 import com.myorg.lab5.model.CollectionManager;
 import com.myorg.lab5.model.MusicBand;
 
@@ -14,17 +14,14 @@ import com.myorg.lab5.model.MusicBand;
  */
 public class PrintDescendingCommand implements Command{
     private CollectionManager collectionManager;
-    private final ConsoleManager consoleManager;
 
     /**
      * Создает команду print_descending.
      * 
      * @param collectionManager менеджер коллекции для получения элементов
-     * @param console консольный менеджер для вывода
      */
-    public PrintDescendingCommand(CollectionManager collectionManager, ConsoleManager consoleManager){
+    public PrintDescendingCommand(CollectionManager collectionManager){
         this.collectionManager = collectionManager;
-        this.consoleManager = consoleManager;
     }
 
     @Override
@@ -33,8 +30,16 @@ public class PrintDescendingCommand implements Command{
         sortedList.sort(Comparator.reverseOrder());
 
         for (MusicBand band : sortedList) {
-            consoleManager.show(band.toString());
+            System.out.println(band.toString());
         }
+    }
+
+    @Override
+    public String executeAndReturn(String[] args){
+        return collectionManager.getList().stream()
+            .sorted(Comparator.reverseOrder())
+            .map(MusicBand::toString)
+            .collect(Collectors.joining("\n"));
     }
 
     @Override

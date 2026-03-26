@@ -1,7 +1,9 @@
 package com.myorg.lab5.commands;
 
-import com.myorg.lab5.io.ConsoleManager;
+import java.util.List;
+
 import com.myorg.lab5.model.CollectionManager;
+import com.myorg.lab5.model.MusicBand;
 
 
 /**
@@ -10,11 +12,9 @@ import com.myorg.lab5.model.CollectionManager;
  */
 public class FilterLessThenNumOfPart implements Command{
     private CollectionManager collectionManager;
-    private final ConsoleManager consoleManager;
 
-    public FilterLessThenNumOfPart(CollectionManager collectionManager, ConsoleManager consoleManager){
+    public FilterLessThenNumOfPart(CollectionManager collectionManager){
         this.collectionManager = collectionManager;
-        this.consoleManager = consoleManager;
     }
 
     /**
@@ -24,7 +24,14 @@ public class FilterLessThenNumOfPart implements Command{
      */
     @Override
     public void execute(String args[]){
-        consoleManager.show(collectionManager.filterLessThanNumbOfParticipants(Integer.parseInt(args[0])).toString());
+        List<MusicBand> filtered = collectionManager.filterLessThanNumbOfParticipants(Integer.parseInt(args[0]));
+        if (filtered.isEmpty()){
+            System.out.println("Нет элементов к количеством участников меньше" + args[0]);
+        } else {
+            filtered.stream()
+                .map(MusicBand::toString)
+                .forEach(System.out::println);
+        }
     }
 
     @Override

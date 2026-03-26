@@ -14,6 +14,10 @@ public class CommandResponse implements Serializable{
         this.message = message;
     }
 
+    public static CommandResponse success(String message){
+        return new CommandResponse(true, message, null);
+    }
+
     public static CommandResponse success(String message, Object data){
         return new CommandResponse(true, message, data);
     }

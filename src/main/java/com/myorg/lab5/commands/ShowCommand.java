@@ -1,6 +1,5 @@
 package com.myorg.lab5.commands;
 
-import com.myorg.lab5.io.ConsoleManager;
 import com.myorg.lab5.model.CollectionManager;
 
 /**
@@ -9,16 +8,16 @@ import com.myorg.lab5.model.CollectionManager;
  */
 public class ShowCommand implements Command{
     private CollectionManager collectionManager;
-    private ConsoleManager consoleManager;
 
-    public ShowCommand(CollectionManager collectionManager, ConsoleManager consoleManager){
+
+    public ShowCommand(CollectionManager collectionManager){
         this.collectionManager = collectionManager;
-        this.consoleManager = consoleManager;
+
     }
 
     @Override
     public void execute(String args[]){
-        consoleManager.show(collectionManager.showElements());
+        System.out.println(collectionManager.showElements());
     }
 
     @Override

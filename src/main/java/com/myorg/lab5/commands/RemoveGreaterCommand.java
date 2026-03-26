@@ -1,7 +1,8 @@
 package com.myorg.lab5.commands;
 
-import com.myorg.lab5.io.ConsoleManager;
 import com.myorg.lab5.model.CollectionManager;
+import com.myorg.lab5.model.MusicBand;
+import com.myorg.lab5.utils.ScriptParser;
 
 /**
  * Команда удаления элементов, превышающих заданный.
@@ -9,22 +10,21 @@ import com.myorg.lab5.model.CollectionManager;
  */
 public class RemoveGreaterCommand implements Command{
     private final CollectionManager collectionManager;
-    private final ConsoleManager parser;
+    private final ScriptParser lineParser = new ScriptParser();
 
     /**
      * Создает команду remove_greater.
      * 
      * @param collectionManager менеджер коллекции для удаления элементов
-     * @param console консольный менеджер для ввода эталонного элемента
      */
-    public RemoveGreaterCommand(CollectionManager collectionManager, ConsoleManager parser){
+    public RemoveGreaterCommand(CollectionManager collectionManager){
         this.collectionManager = collectionManager;
-        this.parser = parser;
     }
     
     @Override
     public void execute(String[] args){
-        collectionManager.removeGreater(parser.parse());
+        MusicBand band = lineParser.parse(args[0]);
+        collectionManager.removeGreater(band);
     }
 
     @Override

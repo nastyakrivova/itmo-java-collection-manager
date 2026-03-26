@@ -1,5 +1,8 @@
 package com.myorg.lab5.commands;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+
 /**
  * Интерфейс для всех команд приложения.
  * Определяет базовый контракт для реализации паттерна "Команда".
@@ -22,4 +25,18 @@ public interface Command {
      * @return строковое описание команды
      */
     public String getDescription();
+
+    
+    default String executeAndReturn(String[] args) {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        PrintStream originalOut = System.out;
+
+        try {
+            System.setOut(new PrintStream(buffer));
+            execute(args);
+            return buffer.toString().trim();
+        } finally {
+            System.setOut(originalOut);
+        }
+    }
 }

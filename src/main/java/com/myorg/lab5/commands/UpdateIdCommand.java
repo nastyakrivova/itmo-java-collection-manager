@@ -1,8 +1,9 @@
 package com.myorg.lab5.commands;
 
-import com.myorg.lab5.io.ConsoleManager;
+
 import com.myorg.lab5.model.CollectionManager;
 import com.myorg.lab5.model.MusicBand;
+import com.myorg.lab5.utils.ScriptParser;
 
 /**
  * Команда обновления элемента по ID.
@@ -10,11 +11,10 @@ import com.myorg.lab5.model.MusicBand;
  */
 public class UpdateIdCommand implements Command{
     private final CollectionManager collectionManager;
-    private final ConsoleManager parser;
+    private final ScriptParser parser = new ScriptParser();
 
-    public UpdateIdCommand(CollectionManager collectionManager, ConsoleManager parser){
+    public UpdateIdCommand(CollectionManager collectionManager){
         this.collectionManager = collectionManager;
-        this.parser = parser;
     }
     
     /**
@@ -24,7 +24,8 @@ public class UpdateIdCommand implements Command{
      */
     @Override
     public void execute(String[] args){
-        MusicBand updatedMusicBand = parser.parse();
+
+        MusicBand updatedMusicBand = parser.parse(args[1]);
         collectionManager.updateId(Integer.parseInt(args[0]), updatedMusicBand);
     }
 

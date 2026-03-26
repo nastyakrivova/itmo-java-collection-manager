@@ -1,7 +1,8 @@
 package com.myorg.lab5.commands;
 
-import com.myorg.lab5.io.ConsoleManager;
 import com.myorg.lab5.model.CollectionManager;
+import com.myorg.lab5.model.MusicBand;
+import com.myorg.lab5.utils.ScriptParser;
 
 /**
  * Команда добавления элемента, если он меньше минимального элемента коллекции.
@@ -9,17 +10,16 @@ import com.myorg.lab5.model.CollectionManager;
  */
 public class AddIfMinCommand implements Command{
     private final CollectionManager collectionManager;
-    private final ConsoleManager parser;
+    private final ScriptParser lineParser = new ScriptParser();
 
     /**
      * Создает команду add_if_min.
      * 
      * @param collectionManager менеджер коллекции для проверки и добавления
-     * @param console консольный менеджер для ввода данных
+
      */
-    public AddIfMinCommand(CollectionManager collectionManager, ConsoleManager parser){
+    public AddIfMinCommand(CollectionManager collectionManager){
         this.collectionManager = collectionManager;
-        this.parser = parser;
     }
     
     /**
@@ -29,7 +29,8 @@ public class AddIfMinCommand implements Command{
      */
     @Override
     public void execute(String[] args){
-        collectionManager.addIfMin(parser.parse());
+        MusicBand band = lineParser.parse(args[0]);
+        collectionManager.addIfMin(band);
     }
 
     @Override

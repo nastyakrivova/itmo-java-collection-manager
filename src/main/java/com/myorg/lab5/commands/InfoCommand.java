@@ -1,6 +1,5 @@
 package com.myorg.lab5.commands;
 
-import com.myorg.lab5.io.ConsoleManager;
 import com.myorg.lab5.model.CollectionManager;
 
 /**
@@ -9,7 +8,7 @@ import com.myorg.lab5.model.CollectionManager;
  */
 public class InfoCommand implements Command{
     private CollectionManager collectionManager;
-    private final ConsoleManager consoleManager;
+  
 
     /**
      * Создает команду info.
@@ -17,14 +16,13 @@ public class InfoCommand implements Command{
      * @param collectionManager менеджер коллекции для получения информации
      * @param console консольный менеджер для вывода
      */
-    public InfoCommand(CollectionManager collectionManager, ConsoleManager consoleManager){
+    public InfoCommand(CollectionManager collectionManager){
         this.collectionManager = collectionManager;
-        this.consoleManager = consoleManager;
     }
 
     @Override
     public void execute(String args[]){
-        consoleManager.show(collectionManager.toString());
+        System.out.println(collectionManager.toString());
     }
 
     @Override

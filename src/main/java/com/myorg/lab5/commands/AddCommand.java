@@ -2,7 +2,8 @@ package com.myorg.lab5.commands;
 
 
 import com.myorg.lab5.model.CollectionManager;
-import com.myorg.lab5.io.ConsoleManager;
+import com.myorg.lab5.model.MusicBand;
+import com.myorg.lab5.utils.ScriptParser;
 
 /**
  * Команда добавления нового элемента в коллекцию.
@@ -12,11 +13,10 @@ import com.myorg.lab5.io.ConsoleManager;
 
 public class AddCommand implements Command{
     private final CollectionManager collectionManager;
-    private final ConsoleManager parser;
+    private final ScriptParser lineParser = new ScriptParser();
 
-    public AddCommand(CollectionManager collectionManager, ConsoleManager parser){
+    public AddCommand(CollectionManager collectionManager){
         this.collectionManager = collectionManager;
-        this.parser = parser;
     }
     
     /**
@@ -25,7 +25,8 @@ public class AddCommand implements Command{
      */
     @Override
     public void execute(String[] args){
-        collectionManager.add(parser.parse());
+        MusicBand band = lineParser.parse(args[0]);
+        collectionManager.add(band);
     }
 
     /**
