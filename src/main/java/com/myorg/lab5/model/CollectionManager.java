@@ -14,9 +14,6 @@ public class CollectionManager {
     private FileManager fileManager;
     private final LocalDate initDate;
 
-    //подается какой-то рандомный тип данных и он его в сит оборачивает?
-    //существует два способа: из скрипта и из консоли ручками, но это на уровень выше важно
-    //ничего не передается при создании, оно само создается, а потом заполняется
     public CollectionManager(){
         this.list = new ArrayList<MusicBand>();
         this.fileManager = new FileManager("data.csv");

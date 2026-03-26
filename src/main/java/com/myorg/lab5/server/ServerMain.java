@@ -49,7 +49,6 @@ public class ServerMain {
             RequestReader requestReader = new RequestReader();
             CommandExecutor commandExecutor = new CommandExecutor(commandManager);
 
-            // DatagramSocket socket = new DatagramSocket(PORT);
             DatagramChannel channel = DatagramChannel.open();
             channel.configureBlocking(false);
             channel.bind(new InetSocketAddress(PORT));
