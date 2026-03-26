@@ -3,16 +3,13 @@ package com.myorg.lab5.server;
 import com.myorg.lab5.CommandRequest;
 import com.myorg.lab5.CommandResponse;
 import com.myorg.lab5.commands.CommandManager;
-import com.myorg.lab5.model.CollectionManager;
 import com.myorg.lab5.model.MusicBand;
 import com.myorg.lab5.utils.ScriptParser;
 
 public class CommandExecutor {
     private final CommandManager commandManager;
-    private final CollectionManager collectionManager;
 
-    public CommandExecutor(CommandManager commandManager, CollectionManager collectionManager){
-        this.collectionManager = collectionManager;
+    public CommandExecutor(CommandManager commandManager){
         this.commandManager = commandManager;
     }
 

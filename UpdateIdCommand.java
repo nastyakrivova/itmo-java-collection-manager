@@ -1,9 +1,8 @@
 package com.myorg.lab5.commands;
 
-
+import com.myorg.lab5.io.ConsoleManager;
 import com.myorg.lab5.model.CollectionManager;
 import com.myorg.lab5.model.MusicBand;
-import com.myorg.lab5.utils.ScriptParser;
 
 /**
  * Команда обновления элемента по ID.
@@ -11,10 +10,11 @@ import com.myorg.lab5.utils.ScriptParser;
  */
 public class UpdateIdCommand implements Command{
     private final CollectionManager collectionManager;
-    private final ScriptParser parser = new ScriptParser();
+    private final ConsoleManager parser;
 
-    public UpdateIdCommand(CollectionManager collectionManager){
+    public UpdateIdCommand(CollectionManager collectionManager, ConsoleManager parser){
         this.collectionManager = collectionManager;
+        this.parser = parser;
     }
     
     /**
@@ -26,7 +26,7 @@ public class UpdateIdCommand implements Command{
     public void execute(String[] args){
 
         if (args.length == 0) {
-            System.out.println("Ошибка: не указан ID. Использование: update <id>");
+            parser.show("Ошибка: не указан ID. Использование: update <id>");
             return;
         }
     
@@ -34,16 +34,17 @@ public class UpdateIdCommand implements Command{
             Integer id = Integer.parseInt(args[0]);
             
             if (collectionManager.containsId(id)){
-                MusicBand updatedMusicBand = parser.parse(args[1]);
+                MusicBand updatedMusicBand = parser.parse();
                 collectionManager.updateId(id, updatedMusicBand);
-                System.out.println("Music band with id: " + id + " has been updated");
+                parser.show("Music band with id: " + id + " has been updated");
             } else {
-                System.out.println("Id not found: " + id);
+                parser.show("Id not found: " + id);
             }
         } catch (NumberFormatException e) {
-            System.out.println("Ошибка: ID должен быть числом");
+            parser.show("Ошибка: ID должен быть числом");
         }
     }
+
 
     @Override
     public String getDescription(){

@@ -20,7 +20,18 @@ public class RemoveById implements Command{
      */
     @Override
     public void execute(String[] args){
-        collectionManager.removeById(Integer.parseInt(args[0]));
+        try {
+            int id = Integer.parseInt(args[0]);
+            boolean removed = collectionManager.removeById(id);
+            
+            if (removed) {
+                System.out.println("Element with id " + id + " removed successfully");
+            } else {
+                System.out.println("Element with id " + id + " not found");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Error: ID must be a number");
+        }
     }
 
     @Override

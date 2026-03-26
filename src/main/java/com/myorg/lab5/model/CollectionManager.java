@@ -31,8 +31,8 @@ public class CollectionManager {
         list.set(id, musicBand);
     }
 
-    public void removeById(int id){
-        list.remove(id);
+    public boolean removeById(int id){
+        return list.removeIf(band -> band.getId() == id);
     }
 
     public void clear(){

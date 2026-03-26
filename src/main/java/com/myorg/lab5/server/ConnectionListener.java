@@ -31,7 +31,6 @@ public class ConnectionListener {
     public void start() {
         System.out.println("Сервер запущен, ожидание подключений...");
         ByteBuffer buffer = ByteBuffer.allocate(8192);
-        int count = 0;
 
         while(running){
             try{
@@ -39,7 +38,6 @@ public class ConnectionListener {
                 SocketAddress clientAddress = channel.receive(buffer);
 
                 if(clientAddress != null){
-                    count = 0;
                     buffer.flip();
                     byte[] data = new byte[buffer.remaining()];
                     buffer.get(data);
@@ -57,8 +55,6 @@ public class ConnectionListener {
 
                     responseSender.send(response, clientAddress);
                     System.out.println("Ответ отправлен клиенту: " + clientAddress);
-                } else {
-                    count++;
                 }
 
             } catch (Exception e) {

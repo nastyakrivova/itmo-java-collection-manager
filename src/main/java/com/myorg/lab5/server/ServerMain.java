@@ -24,7 +24,6 @@ import com.myorg.lab5.commands.UpdateIdCommand;
 import com.myorg.lab5.io.FileManager;
 import com.myorg.lab5.model.CollectionManager;
 import com.myorg.lab5.model.MusicBand;
-import com.myorg.lab5.utils.ScriptParser;
 
 
 public class ServerMain {
@@ -48,7 +47,7 @@ public class ServerMain {
             }
 
             RequestReader requestReader = new RequestReader();
-            CommandExecutor commandExecutor = new CommandExecutor(commandManager, collectionManager);
+            CommandExecutor commandExecutor = new CommandExecutor(commandManager);
 
             // DatagramSocket socket = new DatagramSocket(PORT);
             DatagramChannel channel = DatagramChannel.open();
@@ -94,7 +93,7 @@ public class ServerMain {
         commandManager.register("count_by_studio", new CountByStudioCommand(collectionManager));
         commandManager.register("filter_less_than_number_of_participants", new FilterLessThenNumOfPart(collectionManager));
         commandManager.register("print_descending", new PrintDescendingCommand(collectionManager));
-        commandManager.register("execute_script", new ExecuteScriptCommand(new ScriptParser()));
+        commandManager.register("execute_script", new ExecuteScriptCommand(commandManager));
 
         commandManager.register("server_save", new ServerSaveCommand(collectionManager));
 

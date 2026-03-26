@@ -46,6 +46,14 @@ public class CommandBuilder {
 
         }
 
+        if (commandName.equals("execute_script")) {
+            if (!validator.validateExecuteScriptArgs(argsString)) {
+                consoleManager.show("Ошибка: укажите путь к скрипту (.txt)");
+                return null;
+            }
+            return new CommandRequest(commandName, argsString);
+        }
+
         if (commandName.equals("update")){
             consoleManager.show("Обновление элемента\n");
             int id = Integer.parseInt(argsString);
@@ -67,13 +75,7 @@ public class CommandBuilder {
             return new CommandRequest(commandName, argsString);
         }
 
-        if (commandName.equals("execute_script")) {
-            if (!validator.validateExecuteScriptArgs(argsString)) {
-                consoleManager.show("Ошибка: укажите путь к скрипту (.txt)");
-                return null;
-            }
-            return new CommandRequest(commandName, argsString);
-        }
+
 
         if (argsString.isEmpty()) {
             return new CommandRequest(commandName);

@@ -1,7 +1,8 @@
 package com.myorg.lab5.commands;
 
 
-import com.myorg.lab5.utils.ScriptParser;
+import java.io.BufferedReader;
+import java.io.FileReader;
 
 /**
  * Команда выполнения скрипта из файла.
@@ -10,10 +11,10 @@ import com.myorg.lab5.utils.ScriptParser;
  * Использует BufferedInputStream для чтения файла согласно требованиям.
  */
 public class ExecuteScriptCommand implements Command{
-    private ScriptParser scriptParser;
+    private final CommandManager commandManager;
 
-    public ExecuteScriptCommand(ScriptParser scriptParser){
-        this.scriptParser = scriptParser;
+    public ExecuteScriptCommand(CommandManager commandManager){
+        this.commandManager = commandManager;
     }
     
     /**
@@ -29,8 +30,29 @@ public class ExecuteScriptCommand implements Command{
             System.out.println("Error: Please specify script file name");
             return;
         }
-        scriptParser.parse(args[0]);
+        try (BufferedReader reader = new BufferedReader(new FileReader(args[0]))) {
+            String line;
+            int lineNum = 0;
+            
+            while ((line = reader.readLine()) != null) {
+                lineNum++;
+                line = line.trim();
+                
+                if (line.isEmpty() || line.startsWith("#")) {
+                    continue;
+                }
+                
+                boolean success = commandManager.execute(line);
+                if (!success) {
+                    System.err.println("Ошибка выполнения: строки " + lineNum +  ":" + line);
+                }
+            }
+        }catch(Exception e){
+            System.out.println("Ошибка чтения файла: " + e.getMessage());
+        }
     }
+
+
 
     @Override
     public String getDescription(){

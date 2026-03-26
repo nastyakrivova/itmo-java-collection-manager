@@ -41,6 +41,11 @@ public class ClientMain {
                     }
 
                     CommandRequest request = commandBuilder.build(input);
+
+                    if(request == null){
+                        continue;
+                    }
+
                     CommandResponse response = networkClient.sendCommand(request);
                     responsePrinter.print(response);
 

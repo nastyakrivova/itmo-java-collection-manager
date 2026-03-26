@@ -23,7 +23,7 @@ public class Validator {
 
     public boolean validateExecuteScriptArgs(String args) {
         if (args == null || args.isEmpty()) return false;
-        return args.endsWith(".csv") || args.contains("/") || args.contains("\\");
+        return args.endsWith(".txt") || args.contains("/") || args.contains("\\");
     }
 
     public boolean validNumericalArg(String args){
