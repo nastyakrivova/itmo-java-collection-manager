@@ -34,13 +34,18 @@ data.csv
 *.docx
 *.puml
 *.pdf
-Кривова отчет лаб5.docx
-Лабораторная1_Кривова.docx
-uml.puml
+*.docx
+*.puml
+*.png
+script_test.txt
+UpdatedCommand.java   
 
 # IDEA
 .idea/
 *.iml
+.mvn/
 
 # Сборка
 target/
+trash/
+test/

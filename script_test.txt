@@ -1,3 +1,0 @@
-add Queen,100,200,5,15,POP,EMI,8
-help
-show
