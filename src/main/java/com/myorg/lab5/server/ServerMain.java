@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.DatagramChannel;
 import java.util.Collection;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.myorg.lab5.commands.AddCommand;
 import com.myorg.lab5.commands.AddIfMinCommand;
@@ -28,12 +30,13 @@ import com.myorg.lab5.model.MusicBand;
 
 public class ServerMain {
     private static final int PORT = 9807;
+    private static final Logger logger = LogManager.getLogger(ServerMain.class);
     public static void main(String[] args){
-        System.out.println("Инициализация сервера...\n");
+        logger.info("Server initialization...\n");
 
         String fileName = System.getenv("DATA");
         if(fileName == null){
-            System.err.println("Переменная окружения DATA не установлена");
+            logger.error("Environment variable DATA not set");
         }
 
         try{
@@ -45,6 +48,7 @@ public class ServerMain {
             for (MusicBand band : collection) {
                 collectionManager.add(band);
             }
+            logger.info("Loaded {} items", collectionManager.getList().size());
 
             RequestReader requestReader = new RequestReader();
             CommandExecutor commandExecutor = new CommandExecutor(commandManager);
@@ -52,27 +56,28 @@ public class ServerMain {
             DatagramChannel channel = DatagramChannel.open();
             channel.configureBlocking(false);
             channel.bind(new InetSocketAddress(PORT));
+            logger.info("Server started on port {} in non-blocking mode", PORT);
             ResponseSender responseSender = new ResponseSender(channel);
 
             ConnectionListener connectionListener = new ConnectionListener(channel, requestReader, commandExecutor, responseSender);
 
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                System.out.println("Сохранение коллекции...");
+                logger.info("Saving collection...");
                 collectionManager.save();
                 try{
                     channel.close();
                 } catch(Exception e){
-                    System.out.println(e.getMessage());
+                    logger.error("Error during closing channel", e);
                 }
                 
             }));
 
             connectionListener.start();
         }catch (IOException e) {
-            System.out.println("Не получается загрузить файл: " + e.getMessage());
-            System.out.println("Начало с пустой коллекцией");
+            logger.warn("Can't upload the file: " + e.getMessage());
+            logger.warn("Start with empty collection");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Unexpected error", e);
         }
     }
 

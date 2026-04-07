@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.myorg.lab5.CommandResponse;
 import com.myorg.lab5.SerializationUtil;
@@ -11,6 +13,7 @@ import com.myorg.lab5.SerializationUtil;
 
 public class ResponseSender {
     private final DatagramChannel channel;
+    private static final Logger logger = LogManager.getLogger(ServerMain.class);
 
 
     public ResponseSender(DatagramChannel channel){
@@ -22,9 +25,9 @@ public class ResponseSender {
             byte[] responseData = SerializationUtil.serialize(response);
             ByteBuffer buffer = ByteBuffer.wrap(responseData);
             int sent = channel.send(buffer, clientAddress);
-            System.out.println("Клиенту отправлен ответ" + sent + "байт" + response.isSuccess());
+            logger.info("Response has been sent to the client " + sent + " byte " + response.isSuccess());
             if (response.getMessage() != null) {
-                System.out.println("Сообщение: " + response.getMessage());
+                logger.info("Message: " + response.getMessage());
             }
         } catch(IOException e){
             e.getMessage();

@@ -4,11 +4,15 @@ package com.myorg.lab5.server;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.myorg.lab5.CommandRequest;
 import com.myorg.lab5.CommandResponse;
 
 public class ConnectionListener {
+
+    private static final Logger logger = LogManager.getLogger(ServerMain.class);
 
     private final RequestReader requestReader;
     private final CommandExecutor commandExecutor;
@@ -29,7 +33,8 @@ public class ConnectionListener {
     }
 
     public void start() {
-        System.out.println("Сервер запущен, ожидание подключений...");
+        System.out.println("dgrtg");
+        logger.info("Server is running, waiting for connection...");
         ByteBuffer buffer = ByteBuffer.allocate(8192);
 
         while(running){
@@ -41,12 +46,12 @@ public class ConnectionListener {
                     buffer.flip();
                     byte[] data = new byte[buffer.remaining()];
                     buffer.get(data);
-                    System.out.println("\n Получен пакет от: " + clientAddress);
+                    logger.info("\n Package received from: " + clientAddress);
 
                     CommandRequest request = requestReader.readRequest(data);
 
                     if(request == null){
-                        System.err.println("Не удалось прочитать запрос");
+                        logger.error("Failed to read request");
                         continue;
                     }
 
@@ -54,12 +59,12 @@ public class ConnectionListener {
                     CommandResponse response = commandExecutor.execute(request);
 
                     responseSender.send(response, clientAddress);
-                    System.out.println("Ответ отправлен клиенту: " + clientAddress);
+                    logger.info("Response was sent to client: " + clientAddress);
                 }
 
             } catch (Exception e) {
                 if(running) {
-                    System.err.println("Ошибка: " + e.getMessage());
+                    logger.info("Error: " + e.getMessage());
                 }
             }
             

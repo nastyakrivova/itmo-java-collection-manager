@@ -2,12 +2,17 @@ package com.myorg.lab5.server;
 
 import com.myorg.lab5.CommandRequest;
 import com.myorg.lab5.SerializationUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class RequestReader {
+
+    private static final Logger logger = LogManager.getLogger(ServerMain.class);
+
     public CommandRequest readRequest(byte[] data){
         try{
 
-            System.out.println("Получено " + data.length + " байт");
+            logger.info("Received " + data.length + " byte");
 
             Object obj = SerializationUtil.deserialize(data);
 
@@ -15,7 +20,7 @@ public class RequestReader {
                 CommandRequest request = (CommandRequest) obj;
                 return request;
             } else {
-                System.err.println("Получен объект неизвестного типа: " + obj.getClass().getName());
+                logger.error("Received object unknown type: " + obj.getClass().getName());
                 return null;
             }
 
