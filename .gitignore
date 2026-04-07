@@ -38,7 +38,7 @@ data.csv
 *.puml
 *.png
 script_test.txt
-UpdatedCommand.java   
+UpdateIdCommand2.java   
 
 # IDEA
 .idea/

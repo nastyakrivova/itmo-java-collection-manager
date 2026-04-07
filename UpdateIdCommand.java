@@ -1,4 +1,4 @@
-package com.myorg.lab5.commands;
+
 
 import com.myorg.lab5.io.ConsoleManager;
 import com.myorg.lab5.model.CollectionManager;
