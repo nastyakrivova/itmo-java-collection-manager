@@ -13,6 +13,7 @@ public class ScriptParser{
 
     public MusicBand parse(String line){
         line = line.trim();
+        line = line.replace("\r", "");
         String[] data = line.split(",", -1);
 
         if (data.length < 6) {

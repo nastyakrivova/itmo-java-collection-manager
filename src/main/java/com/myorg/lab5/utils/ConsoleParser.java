@@ -14,15 +14,59 @@ public class ConsoleParser{
         this.scanner = new Scanner(System.in);
     }
 
-    public MusicBand parse(){
+    private String readStringWithEscape(String message, String errorMessage) {
+        while (true) {
+            System.out.println(message);
+            String input = scanner.nextLine();
+            String unescaped = unescape(input);
+            
+            if (!unescaped.isEmpty()) {
+                return unescaped;
+            }
+            System.out.println("Error: " + errorMessage);
+        }
+    }
+    
+    private String unescape(String input) {
+        if (input == null || input.isEmpty()) {
+            return input;
+        }
+        
+        StringBuilder result = new StringBuilder();
+        boolean escapeNext = false;
+        
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            
+            if (escapeNext) {
+                switch (c) {
+                    case 'n': result.append('\n'); break;
+                    case 'r': result.append('\r'); break;
+                    case 't': result.append('\t'); break;
+                    case ',': result.append(','); break;
+                    case '\\': result.append('\\'); break;
+                    default: result.append(c);
+                }
+                escapeNext = false;
+            } else if (c == '\\') {
+                escapeNext = true;
+            } else {
+                result.append(c);
+            }
+        }
+        
+        return result.toString();
+    }
+    
+    public MusicBand parse() {
         System.out.print("\nAdding new music band: ");
-        String name = readString("Name: ", "Cannot be empty");
-
+        String name = readStringWithEscape("Name: ", "Cannot be empty");  // ← изменено
+        
         System.out.println("\nCoordinates: ");
         int x = readInt("x (max 290): ", 290);
         int y = readInt("y: ", Integer.MAX_VALUE);
         Coordinates coordinates = new Coordinates(x, y);
-
+        
         int participants = readPositiveInt("Number of participants (>0): ");
         int albums = readPositiveInt("Number of albums (>0): ");
         
@@ -30,19 +74,8 @@ public class ConsoleParser{
         
         Studio studio = readOptionalStudio();
         Integer singles = readOptionalInt("Number of singles");
-        MusicBand band = new MusicBand(name, coordinates, participants, albums, genre, studio, singles);
-        return band;
-    }
-
-
-
-    private String readString(String message, String errorMessage){
-        while(true) {
-            System.out.println(message);
-            String name = scanner.nextLine().trim();
-            if (!name.isEmpty()){ return name; }
-            System.out.println("Error: " + errorMessage);
-        }
+        
+        return new MusicBand(name, coordinates, participants, albums, genre, studio, singles);
     }
 
     private int readInt(String message, int maxValue){
