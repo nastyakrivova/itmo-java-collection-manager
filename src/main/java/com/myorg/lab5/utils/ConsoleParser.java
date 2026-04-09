@@ -60,7 +60,7 @@ public class ConsoleParser{
     
     public MusicBand parse() {
         System.out.print("\nAdding new music band: ");
-        String name = readStringWithEscape("Name: ", "Cannot be empty");  // ← изменено
+        String name = readStringWithEscape("Name: ", "Cannot be empty");
         
         System.out.println("\nCoordinates: ");
         int x = readInt("x (max 290): ", 290);

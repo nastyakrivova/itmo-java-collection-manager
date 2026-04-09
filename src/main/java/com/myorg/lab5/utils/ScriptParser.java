@@ -5,6 +5,8 @@ import com.myorg.lab5.model.Coordinates;
 import com.myorg.lab5.model.MusicBand;
 import com.myorg.lab5.model.MusicGenre;
 import com.myorg.lab5.model.Studio;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ScriptParser{
     public ScriptParser(){
@@ -14,7 +16,32 @@ public class ScriptParser{
     public MusicBand parse(String line){
         line = line.trim();
         line = line.replace("\r", "");
-        String[] data = line.split(",", -1);
+
+
+        List<String> fields = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        boolean inQuotes = false;
+        
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
+            
+            if (c == '"') {
+                if (inQuotes && i + 1 < line.length() && line.charAt(i + 1) == '"') {
+                    current.append('"');
+                    i++;
+                } else {
+                    inQuotes = !inQuotes;
+                }
+            } else if (c == ',' && !inQuotes) {
+                fields.add(current.toString());
+                current.setLength(0);
+            } else {
+                current.append(c);
+            }
+        }
+        fields.add(current.toString());
+        
+        String[] data = fields.toArray(new String[0]);
 
         if (data.length < 6) {
             throw new IllegalArgumentException("Not enough fields in CSV line");
@@ -46,9 +73,15 @@ public class ScriptParser{
     }
 
     public String toCsv(MusicBand musicBand){
+        
         StringBuilder line = new StringBuilder();
-
-        line.append(musicBand.getName()).append(",");
+        String name = musicBand.getName();
+        if (name.contains(",")) {
+            line.append("\"").append(name).append("\"");
+        } else {
+            line.append(name);
+        }
+        line.append(",");
         line.append(musicBand.getCoordinates().getX()).append(",");
         line.append(musicBand.getCoordinates().getY()).append(",");
         line.append(musicBand.getNumberOfParticipants()).append(",");
