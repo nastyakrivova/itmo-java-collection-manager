@@ -96,6 +96,10 @@ public class CollectionManager {
         return list;
     }
 
+    public void loadFromDB(){
+        
+    }
+
     @Override
     public String toString(){
         StringBuilder sb = new StringBuilder();

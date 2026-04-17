@@ -23,7 +23,6 @@ import com.myorg.lab5.commands.RemoveLowerCommand;
 import com.myorg.lab5.commands.ShowCommand;
 import com.myorg.lab5.commands.ServerSaveCommand;
 import com.myorg.lab5.commands.UpdateIdCommand;
-import com.myorg.lab5.io.FileManager;
 import com.myorg.lab5.model.CollectionManager;
 import com.myorg.lab5.model.MusicBand;
 
@@ -40,14 +39,16 @@ public class ServerMain {
         }
 
         try{
-            FileManager fileManager = new FileManager(fileName);
+
+            String dbUrl = "jdbc:postgresql://pg/studs";
+            String dbUser = "s502501";
+            String dbPassword = "BTJH*1915";
+
+            DBManager dbManager = new DBManager(dbUrl, dbUser, dbPassword);
             CollectionManager collectionManager = new CollectionManager();
             CommandManager commandManager = createCommandManager(collectionManager);
 
-            Collection<MusicBand> collection = fileManager.load();
-            for (MusicBand band : collection) {
-                collectionManager.add(band);
-            }
+            collectionManager.loadFromDB();
             logger.info("Loaded {} items", collectionManager.getList().size());
 
             RequestReader requestReader = new RequestReader();
@@ -61,16 +62,16 @@ public class ServerMain {
 
             ConnectionListener connectionListener = new ConnectionListener(channel, requestReader, commandExecutor, responseSender);
 
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                logger.info("Saving collection...");
-                collectionManager.save();
-                try{
-                    channel.close();
-                } catch(Exception e){
-                    logger.error("Error during closing channel", e);
-                }
+            // Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            //     logger.info("Saving collection...");
+            //     collectionManager.save();
+            //     try{
+            //         channel.close();
+            //     } catch(Exception e){
+            //         logger.error("Error during closing channel", e);
+            //     }
                 
-            }));
+            // }));
 
             connectionListener.start();
         }catch (IOException e) {

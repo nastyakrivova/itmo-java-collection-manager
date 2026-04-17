@@ -44,6 +44,9 @@ public class MusicBand implements Comparable<MusicBand>, Serializable{
         setSinglesCount(singlesCount);
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
 
     private void setId() {
         this.id = generator.getAndIncrement();
@@ -98,6 +101,10 @@ public class MusicBand implements Comparable<MusicBand>, Serializable{
 
     public void setStudio(Studio studio) {
         this.studio = studio;
+    }
+
+    public void setCreationDate(LocalDate date){
+        this.creationDate = date;
     }
 
     public Integer getId() { return id; }
