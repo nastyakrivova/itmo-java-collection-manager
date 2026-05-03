@@ -1,52 +1,62 @@
 package com.myorg.lab5.commands;
 
-
 import com.myorg.lab5.model.CollectionManager;
+import com.myorg.lab5.model.CollectionManager.OperationResult;
 import com.myorg.lab5.model.MusicBand;
 import com.myorg.lab5.utils.ScriptParser;
 
-/**
- * Команда обновления элемента по ID.
- * Заменяет элемент с указанным ID новыми данными.
- */
-public class UpdateIdCommand implements Command{
+public class UpdateIdCommand implements Command {
     private final CollectionManager collectionManager;
     private final ScriptParser parser = new ScriptParser();
 
-    public UpdateIdCommand(CollectionManager collectionManager){
+    public UpdateIdCommand(CollectionManager collectionManager) {
         this.collectionManager = collectionManager;
     }
     
-    /**
-     * Обновляет элемент с указанным ID.
-     * 
-     * @param args массив аргументов, где args[0] - ID обновляемого элемента
-     */
     @Override
-    public void execute(String[] args, int userId){
-
-        if (args.length == 0) {
-            System.out.println("Ошибка: не указан ID. Использование: update <id>");
+    public void execute(String[] args, int userId) {
+        if (args == null || args.length < 2) {
+            System.out.println("Error: update <id> <band_data>");
             return;
         }
-    
+        
         try {
-            Integer id = Integer.parseInt(args[0]);
+            int id = Integer.parseInt(args[0].trim());
+            String bandData = args[1];
             
-            if (collectionManager.containsId(id)){
-                MusicBand updatedMusicBand = parser.parse(args[1]);
-                collectionManager.updateId(id, updatedMusicBand, userId);
-                System.out.println("Music band with id: " + id + " has been updated");
-            } else {
-                System.out.println("Id not found: " + id);
+            MusicBand newBandData = parser.parse(bandData);
+            if (newBandData == null) {
+                System.out.println("Error: Invalid band data format");
+                return;
             }
+            
+            // Ещё раз проверяем владельца (на случай, если вызывают без check_update)
+            MusicBand existing = collectionManager.getBandById(id);
+            if (existing == null) {
+                System.out.println("Element with id " + id + " not found");
+                return;
+            }
+            if (existing.getOwnerId() != userId) {
+                System.out.println("Access denied: You are not the owner of element " + id);
+                return;
+            }
+            
+            OperationResult result = collectionManager.updateId(id, newBandData, userId);
+            if (result == OperationResult.SUCCESS) {
+                System.out.println("Element with id " + id + " updated successfully");
+            } else {
+                System.out.println("Error: Could not update element " + id);
+            }
+            
         } catch (NumberFormatException e) {
-            System.out.println("Ошибка: ID должен быть числом");
+            System.out.println("Error: ID must be a number");
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 
     @Override
-    public String getDescription(){
+    public String getDescription() {
         return "- Update an element by its ID";
     }
 }

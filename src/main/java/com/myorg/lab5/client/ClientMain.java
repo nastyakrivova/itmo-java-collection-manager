@@ -1,6 +1,8 @@
 package com.myorg.lab5.client;
 
 import java.net.SocketTimeoutException;
+import java.util.Scanner;
+
 import com.myorg.lab5.data_exchange.CommandRequest;
 import com.myorg.lab5.data_exchange.CommandResponse;
 import com.myorg.lab5.io.ConsoleManager;
@@ -15,23 +17,31 @@ public class ClientMain {
     public static void main(String[] args) {
         System.out.println("Клиент запущен...");
 
-        ConsoleManager consoleManager = new ConsoleManager();
+        // Создаём Scanner для ввода с консоли
+        Scanner scanner = new Scanner(System.in);
+        
+        ConsoleManager consoleManager = new ConsoleManager(scanner);
         Validator validator = new Validator();
-        CommandBuilder commandBuilder = new CommandBuilder(consoleManager, validator);
+        CommandBuilder commandBuilder = new CommandBuilder(consoleManager, validator, scanner);
+
         ResponsePrinter responsePrinter = new ResponsePrinter(consoleManager);
 
         try (NetworkClient networkClient = new NetworkClient(SERVER_HOST, SERVER_PORT)) {
             consoleManager.show("Подключение установлено");
             
-            // ========== АУТЕНТИФИКАЦИЯ (цикл до успеха) ==========
-            while (!authenticateUser(consoleManager, networkClient)) {
-                consoleManager.show("Повторитe попытку");
+            // Аутентификация
+            while (!authenticateUser(consoleManager, networkClient, scanner)) {
+                String retry = consoleManager.read("Повторить попытку? (y/n): ");
+                if (!"y".equalsIgnoreCase(retry)) {
+                    consoleManager.show("Завершение работы...");
+                    return;
+                }
             }
             
             consoleManager.show("Авторизация успешна!");
             consoleManager.show("Введите help для списка команд");
 
-            // ========== ОСНОВНОЙ ЦИКЛ КОМАНД ==========
+            // Основной цикл команд
             while (true) {
                 try {
                     String input = consoleManager.read();
@@ -48,13 +58,49 @@ public class ClientMain {
                         continue;
                     }
 
-                    // Используем только один способ создания CommandRequest
                     CommandRequest request = commandBuilder.build(input, currentLogin, currentPassword);
-
+                    
                     if (request == null) {
                         continue;
                     }
-
+                    
+                    // Обработка check_update
+                    if (request.getCommandName().equals("check_update")) {
+                        CommandResponse response = networkClient.sendCommand(request);
+                        String msg = response.getMessage();
+                        
+                        if (msg == null) {
+                            consoleManager.show("Error checking element");
+                            continue;
+                        }
+                        
+                        if (msg.startsWith("NOT_FOUND:")) {
+                            int id = Integer.parseInt(msg.split(":")[1]);
+                            consoleManager.show("Element with id " + id + " not found");
+                            continue;
+                        }
+                        
+                        if (msg.startsWith("NOT_OWNER:")) {
+                            int id = Integer.parseInt(msg.split(":")[1]);
+                            consoleManager.show("Access denied: You are not the owner of element " + id);
+                            continue;
+                        }
+                        
+                        if (msg.startsWith("OK:")) {
+                            int id = Integer.parseInt(msg.split(":")[1]);
+                            CommandRequest updateRequest = commandBuilder.buildUpdateWithData(id, currentLogin, currentPassword);
+                            if (updateRequest != null) {
+                                CommandResponse updateResponse = networkClient.sendCommand(updateRequest);
+                                consoleManager.show(updateResponse.getMessage());
+                            }
+                            continue;
+                        }
+                        
+                        consoleManager.show(msg);
+                        continue;
+                    }
+                    
+                    // Обычная отправка команд
                     CommandResponse response = networkClient.sendCommand(request);
                     responsePrinter.print(response);
 
@@ -67,12 +113,15 @@ public class ClientMain {
         } catch (Exception e) {
             consoleManager.show("Не удалось подключиться к серверу: " + e.getMessage());
             System.exit(1);
+        } finally {
+            scanner.close();
         }
     }
 
-    private static boolean authenticateUser(ConsoleManager consoleManager, NetworkClient networkClient) {
+    private static boolean authenticateUser(ConsoleManager consoleManager, NetworkClient networkClient, Scanner scanner) {
         try {
-            String choice = consoleManager.read("1 - Вход, 2 - Регистрация: ");
+            consoleManager.show("\n=== АВТОРИЗАЦИЯ ===");
+            String choice = consoleManager.read("1 - Вход | 2 - Регистрация: ");
             
             String login = consoleManager.read("Логин: ");
             String password = consoleManager.read("Пароль: ");
@@ -87,14 +136,7 @@ public class ClientMain {
                 return false;
             }
             
-            // ЕДИНСТВЕННЫЙ СПОСОБ создать CommandRequest
-            CommandRequest authRequest = new CommandRequest(
-                commandName, 
-                new String[]{login, password}, 
-                null,  // при регистрации/логине логин/пароль в args, а не в полях
-                null
-            );
-            
+            CommandRequest authRequest = new CommandRequest(commandName, new Object[]{login, password}, null, null);
             CommandResponse response = networkClient.sendCommand(authRequest);
             
             if (response.isSuccess()) {

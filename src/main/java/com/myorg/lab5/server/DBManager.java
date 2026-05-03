@@ -123,7 +123,12 @@ public class DBManager {
                 band.setId(id);
                 band.setCreationDate(creationDate);
                 band.setSinglesCount(singlesCount);
-                band.setStudio(new Studio(studioName));
+                band.setOwnerId(ownerId);
+                if (studioName != null && !studioName.isEmpty()) {
+                    band.setStudio(new Studio(studioName));
+                } else {
+                    band.setStudio(null);  // или не вызывать setStudio вообще
+                }
                 
                 bands.add(band);
             }
@@ -217,7 +222,7 @@ public class DBManager {
             pstmt.setString(1, login);
             ResultSet rs = pstmt.executeQuery();
             if(rs.next()) {
-                String hashInTable = rs.getString("passward_hash");
+                String hashInTable = rs.getString("password_hash");
                 String salt = rs.getString("salt");
                 if (Password.verifyPassword(password, salt, hashInTable)){
                     Integer userId = rs.getInt("id");

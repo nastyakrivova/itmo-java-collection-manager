@@ -1,41 +1,46 @@
 package com.myorg.lab5.commands;
 
-
 import com.myorg.lab5.model.CollectionManager;
 import com.myorg.lab5.model.MusicBand;
 import com.myorg.lab5.utils.ScriptParser;
 
-/**
- * Команда добавления нового элемента в коллекцию.
- * Запрашивает у пользователя данные для создания объекта MusicBand
- * и добавляет его в коллекцию.
- */
-
-public class AddCommand implements Command{
+public class AddCommand implements Command {
     private final CollectionManager collectionManager;
-    private final ScriptParser lineParser = new ScriptParser();
+    private final ScriptParser parser = new ScriptParser();
 
-    public AddCommand(CollectionManager collectionManager){
+    public AddCommand(CollectionManager collectionManager) {
         this.collectionManager = collectionManager;
     }
     
-    /**
-     * Выполняет команду добавления.
-     * Парсит введенные пользователем данные и добавляет новый элемент в коллекцию.
-     */
     @Override
-    public void execute(String[] args, int userId){
-        MusicBand band = lineParser.parse(args[0]);
-        collectionManager.add(band, userId);
+    public void execute(String[] args, int userId) {
+        if (args == null || args.length == 0) {
+            System.out.println("Error: No band data provided");
+            return;
+        }
+        
+        try {
+            String bandData = args[0];
+            MusicBand band = parser.parse(bandData);
+            
+            if (band == null) {
+                System.out.println("Error: Invalid band data format");
+                return;
+            }
+            
+            boolean success = collectionManager.add(band, userId);
+            if (success) {
+                System.out.println("Band added successfully with ID: " + band.getId());
+            } else {
+                System.out.println("Error: Failed to add band");
+            }
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
     }
 
-    /**
-     * Возвращает описание команды для справки.
-     * 
-     * @return строковое описание команды
-     */
     @Override
-    public String getDescription(){
+    public String getDescription() {
         return "- Add a new element to the collection";
     }
 }

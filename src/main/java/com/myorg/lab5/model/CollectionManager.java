@@ -31,65 +31,115 @@ public class CollectionManager {
         this.initDate = LocalDate.now();
     }
 
-    public void add(MusicBand musicBand, int ownerId){
+    public enum OperationResult {
+        NOT_FOUND,
+        NOT_OWNER,
+        SUCCESS,
+        ERROR
+    }
+
+    public boolean add(MusicBand musicBand, int ownerId){
         synchronized(list) {
             try{
                 int id = dbManager.saveMusicBand(musicBand, ownerId);
                 if (id > 0){
                     musicBand.setId(id);
+                    musicBand.setOwnerId(ownerId);
                     list.add(musicBand);
                     logger.info("Added band to collection: id={}, ownerId={}", id, ownerId);
+                    return true;
                 } else {
                     logger.error("Failed to save band, returned id={}", id);
+                    return false;
                 }
             } catch (SQLException e){
                 logger.error("Error saving in db: " + e.getMessage());
+                return false;
             }
         }
         
         
     }
 
-    public void updateId(int id, MusicBand musicBand, int userId){
+    public OperationResult updateId(int id, MusicBand musicBand, int userId){
         synchronized(list){
+
+            MusicBand found_band = list.stream()
+                    .filter(b -> b.getId() == id)
+                    .findFirst()
+                    .orElse(null);
+
+            if(found_band == null){
+                return OperationResult.NOT_FOUND;
+            }
+            if(found_band.getOwnerId() != userId){
+                return OperationResult.NOT_OWNER;
+            }
             try{
                 if(dbManager.updateMusicBand(id, musicBand, userId)){
-                    for (int i = 0; i < list.size(); i++){
-                        if(list.get(i).getId() == id){
-                            list.set(i, musicBand);
-                            logger.info("Updated band: id={}, userId={}", id, userId);
-                            break;
-                        }
-                    }
-                }else {
-                    logger.warn("User {} not owner of band {}", userId, id);
+                    musicBand.setId(id);
+                    musicBand.setOwnerId(userId);
+                    int ind = list.indexOf(found_band);
+                    list.set(ind, musicBand);
+                    return OperationResult.SUCCESS;
                 }
             }catch(SQLException e){
                 logger.error("Error updating element in db: " + e.getMessage());
             }
+            return OperationResult.ERROR;
         }
         
     }
 
-    public boolean removeById(int id, int userId){
+    public OperationResult removeById(int id, int userId){
         synchronized(list){
+            MusicBand band = list.stream()
+                .filter(b -> b.getId() == id)
+                .findFirst()
+                .orElse(null);
+
+            if (band == null){
+                return OperationResult.NOT_FOUND;
+            }
+            if(band.getOwnerId() != userId){
+                return OperationResult.NOT_OWNER;
+            }
+
             try{
-                if (dbManager.existsById(id)){
-                    if (dbManager.deleteMusicBand(id, userId)){
-                        logger.info("Removed band: id={}, userId={}", id, userId);
-                        return list.removeIf(band -> band.getId() == id);
-                    }
+                
+                if (dbManager.deleteMusicBand(id, userId)){
+                    list.remove(band);
+                    logger.info("Removed band: id={}, userId={}", id, userId);
+                    return OperationResult.SUCCESS;
                 }
-        
+
             }catch(SQLException e){
                 logger.error("Error deleting from db: " + e.getMessage());
             }
-        return false;
+            return OperationResult.ERROR;
         }
     }
 
-    public void clear(){
-        list.clear();
+    public OperationResult clear(int userId){
+        synchronized(list){
+            List<MusicBand> toRemove = list.stream()
+                .filter(b -> b.getOwnerId() == userId)
+                .collect(Collectors.toList());
+
+            if (toRemove.isEmpty()){
+                return OperationResult.NOT_FOUND;
+            }
+            try{
+                for(MusicBand band: toRemove){
+                    dbManager.deleteMusicBand(band.getId(), userId);
+                }
+                list.removeAll(toRemove);
+                return OperationResult.SUCCESS;
+            } catch (SQLException e) {
+                logger.error("Error clearing: " + e.getMessage());
+            }
+            return OperationResult.ERROR;
+        }
     }
 
     public boolean containsId(Integer id){
@@ -140,6 +190,15 @@ public class CollectionManager {
                 .collect(Collectors.joining("\n"));
         }
     }
+
+    public MusicBand getBandById(int id) {
+    synchronized(list) {
+        return list.stream()
+            .filter(b -> b.getId() == id)
+            .findFirst()
+            .orElse(null);
+    }
+}
 
     public ArrayList<MusicBand> getList(){
         return list;

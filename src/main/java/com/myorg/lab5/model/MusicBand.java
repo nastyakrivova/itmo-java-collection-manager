@@ -17,6 +17,7 @@ public class MusicBand implements Comparable<MusicBand>, Serializable{
     private int albumsCount;
     private MusicGenre genre;
     private Studio studio;
+    private int ownerId;
 
     public MusicBand(String name,
                     Coordinates coordinates,
@@ -50,6 +51,10 @@ public class MusicBand implements Comparable<MusicBand>, Serializable{
 
     private void setId() {
         this.id = generator.getAndIncrement();
+    }
+
+    public void setOwnerId(int ownerId){
+        this.ownerId = ownerId;
     }
 
     private void setCreationDate() {
@@ -116,6 +121,7 @@ public class MusicBand implements Comparable<MusicBand>, Serializable{
     public Integer getSinglesCount() { return singlesCount; }
     public MusicGenre getGenre() { return genre; }
     public Studio getStudio() { return studio; }
+    public int getOwnerId() {return ownerId;}
 
 
     @Override

@@ -1,6 +1,7 @@
 package com.myorg.lab5.commands;
 
 import com.myorg.lab5.model.CollectionManager;
+import com.myorg.lab5.model.CollectionManager.OperationResult;
 
 /**
  * Команда удаления элемента по ID.
@@ -22,12 +23,21 @@ public class RemoveById implements Command{
     public void execute(String[] args, int userId){
         try {
             int id = Integer.parseInt(args[0]);
-            boolean removed = collectionManager.removeById(id, userId);
+            OperationResult result = collectionManager.removeById(id, userId);
             
-            if (removed) {
-                System.out.println("Element with id " + id + " removed successfully");
-            } else {
-                System.out.println("Element with id " + id + " not found");
+            switch (result) {
+                case NOT_FOUND:
+                    System.out.println("Element with id " + id + " not found");
+                    break;
+                case NOT_OWNER:
+                    System.out.println("Access denied: You are not the owner of element " + id);
+                    break;
+                case SUCCESS:
+                    System.out.println("Element with id " + id + " removed successfully");
+                    break;
+            
+                default:
+                    System.out.println("Error: Could not remove element " + id);
             }
         } catch (NumberFormatException e) {
             System.out.println("Error: ID must be a number");

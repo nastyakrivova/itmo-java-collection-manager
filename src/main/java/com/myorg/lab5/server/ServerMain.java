@@ -4,11 +4,14 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.DatagramChannel;
 import java.util.Collection;
+import java.util.Scanner;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.myorg.lab5.commands.AddCommand;
 import com.myorg.lab5.commands.AddIfMinCommand;
+import com.myorg.lab5.commands.CheckUpdateCommand;
 import com.myorg.lab5.commands.ClearCommand;
 import com.myorg.lab5.commands.CommandManager;
 import com.myorg.lab5.commands.CountByStudioCommand;
@@ -24,6 +27,7 @@ import com.myorg.lab5.commands.ShowCommand;
 import com.myorg.lab5.commands.UpdateIdCommand;
 import com.myorg.lab5.model.CollectionManager;
 import com.myorg.lab5.model.MusicBand;
+import com.myorg.lab5.utils.MusicBandParser;
 
 
 public class ServerMain {
@@ -38,16 +42,18 @@ public class ServerMain {
         // }
 
         try{
-            String url = "jdbc:postgresql://db:5432/studs";
+            // // Для кафедральной БД
+            // String dbUrl = "jdbc:postgresql://pg/studs";
+            // String dbUser = "s502501";
+            // String dbPassword = "BTJH*1915";
+            // DBManager dbManager = new DBManager(dbUrl, dbUser, dbPassword);
+
+            // ИЛИ для локальной БД (закомментируйте кафедральную)
             String dbUrlLocal = "jdbc:postgresql://localhost:5432/testlab7";
             String dbUserLocal = "postgres";
             String dbPasswordLocal = "3013";
-
-            String dbUrl = "jdbc:postgresql://pg/studs";
-            String dbUser = "s502501";
-            String dbPassword = "BTJH*1915";
-
             DBManager dbManager = new DBManager(dbUrlLocal, dbUserLocal, dbPasswordLocal);
+
             CollectionManager collectionManager = new CollectionManager(dbManager);
             CommandManager commandManager = createCommandManager(collectionManager);
 
@@ -95,7 +101,7 @@ public class ServerMain {
         commandManager.register("add", new AddCommand(collectionManager));
         commandManager.register("add_if_min", new AddIfMinCommand(collectionManager));
         commandManager.register("update", new UpdateIdCommand(collectionManager));
-        commandManager.register("remove_by_id", new RemoveById(collectionManager));
+        commandManager.register("check_update", new CheckUpdateCommand(collectionManager));        commandManager.register("remove_by_id", new RemoveById(collectionManager));
         commandManager.register("remove_greater", new RemoveGreaterCommand(collectionManager));
         commandManager.register("remove_lower", new RemoveLowerCommand(collectionManager));
         commandManager.register("count_by_studio", new CountByStudioCommand(collectionManager));

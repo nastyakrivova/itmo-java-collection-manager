@@ -1,6 +1,7 @@
 package com.myorg.lab5.commands;
 
 import com.myorg.lab5.model.CollectionManager;
+import com.myorg.lab5.model.CollectionManager.OperationResult;
 
 /**
  * Команда очистки коллекции.
@@ -20,7 +21,17 @@ public class ClearCommand implements Command{
 
     @Override
     public void execute(String args[], int userId){
-        collectionManager.clear();
+        OperationResult result = collectionManager.clear(userId);
+        switch (result) {
+            case NOT_FOUND:
+                System.out.println("You have no bands to remove");
+                break;
+            case SUCCESS:
+                System.out.println("All your bands have been removed successfully");
+                break;
+            default:
+                System.out.println("Error: Could not clear your bands");
+        }
     }
 
     @Override
