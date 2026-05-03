@@ -1,4 +1,4 @@
-package com.myorg.lab5;
+package com.myorg.lab5.data_exchange;
 
 import java.io.Serializable;
 

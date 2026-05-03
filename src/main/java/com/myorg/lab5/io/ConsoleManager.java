@@ -30,6 +30,11 @@ public class ConsoleManager {
         return scanner.nextLine();
     }
 
+    public String read(String string){
+        System.out.print(string + " ");;
+        return scanner.nextLine();
+    }
+
     /**
      * Парсит ввод пользователя в объект MusicBand.
      * 

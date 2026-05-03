@@ -1,6 +1,6 @@
 package com.myorg.lab5.client;
 
-import com.myorg.lab5.CommandRequest;
+import com.myorg.lab5.data_exchange.CommandRequest;
 import com.myorg.lab5.io.ConsoleManager;
 import com.myorg.lab5.model.MusicBand;
 
@@ -13,7 +13,7 @@ public class CommandBuilder {
         this.validator = validator;
     }
 
-    public CommandRequest build(String input){
+    public CommandRequest build(String input, String login, String password){
         if (input == null || input.isEmpty()){
             return null;
         }
@@ -42,7 +42,7 @@ public class CommandBuilder {
                 consoleManager.show("Ошибка при создании обьекта");
                 return null;
             }
-            return new CommandRequest(commandName, band);
+            return new CommandRequest(commandName, new Object[]{band}, login, password);
 
         }
 
@@ -51,7 +51,7 @@ public class CommandBuilder {
                 consoleManager.show("Ошибка: укажите путь к скрипту (.txt)");
                 return null;
             }
-            return new CommandRequest(commandName, argsString);
+            return new CommandRequest(commandName, new Object[]{argsString}, login, password);
         }
 
         if (commandName.equals("update")){
@@ -63,7 +63,7 @@ public class CommandBuilder {
                 return null;
             }
 
-            return new CommandRequest(commandName, id);
+            return new CommandRequest(commandName, new Object[]{id}, login, password);
         }
 
 
@@ -72,15 +72,15 @@ public class CommandBuilder {
                 consoleManager.show("Ошибка: требуется число");
                 return null;
             }
-            return new CommandRequest(commandName, argsString);
+            return new CommandRequest(commandName, new Object[]{argsString}, login, password);
         }
 
 
 
         if (argsString.isEmpty()) {
-            return new CommandRequest(commandName);
+            return new CommandRequest(commandName, login, password);
         } else {
-            return new CommandRequest(commandName, argsString);
+            return new CommandRequest(commandName, new Object[]{argsString}, login, password);
         }
     }
 }

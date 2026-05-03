@@ -24,7 +24,7 @@ public class FilterLessThenNumOfPart implements Command{
      * @param args массив аргументов, где args[0] - пороговое значение (целое число)
      */
     @Override
-    public void execute(String args[]){
+    public void execute(String args[], int userId){
 
         if (args.length == 0) {
             System.out.println("Ошибка: не указан число для фильтровки");

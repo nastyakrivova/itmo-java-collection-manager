@@ -25,7 +25,7 @@ public class ExecuteScriptCommand implements Command{
      * @param args массив аргументов, где args[0] - имя файла скрипта
      */
     @Override
-    public void execute(String[] args){
+    public void execute(String[] args, int userId){
         if (args.length < 1) {
             System.out.println("Error: Please specify script file name");
             return;
@@ -42,7 +42,7 @@ public class ExecuteScriptCommand implements Command{
                     continue;
                 }
                 
-                boolean success = commandManager.execute(line);
+                boolean success = commandManager.execute(line, userId);
                 if (!success) {
                     System.err.println("Ошибка выполнения: строки " + lineNum +  ":" + line);
                 }

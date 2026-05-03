@@ -1,6 +1,6 @@
 package com.myorg.lab5.client;
 
-import com.myorg.lab5.CommandResponse;
+import com.myorg.lab5.data_exchange.CommandResponse;
 import com.myorg.lab5.io.ConsoleManager;
 
 public class ResponsePrinter {

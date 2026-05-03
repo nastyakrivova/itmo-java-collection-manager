@@ -21,7 +21,6 @@ import com.myorg.lab5.commands.RemoveById;
 import com.myorg.lab5.commands.RemoveGreaterCommand;
 import com.myorg.lab5.commands.RemoveLowerCommand;
 import com.myorg.lab5.commands.ShowCommand;
-import com.myorg.lab5.commands.ServerSaveCommand;
 import com.myorg.lab5.commands.UpdateIdCommand;
 import com.myorg.lab5.model.CollectionManager;
 import com.myorg.lab5.model.MusicBand;
@@ -33,26 +32,30 @@ public class ServerMain {
     public static void main(String[] args){
         logger.info("Server initialization...\n");
 
-        String fileName = System.getenv("DATA");
-        if(fileName == null){
-            logger.error("Environment variable DATA not set");
-        }
+        // String fileName = System.getenv("DATA");
+        // if(fileName == null){
+        //     logger.error("Environment variable DATA not set");
+        // }
 
         try{
+            String url = "jdbc:postgresql://db:5432/studs";
+            String dbUrlLocal = "jdbc:postgresql://localhost:5432/testlab7";
+            String dbUserLocal = "postgres";
+            String dbPasswordLocal = "3013";
 
             String dbUrl = "jdbc:postgresql://pg/studs";
             String dbUser = "s502501";
             String dbPassword = "BTJH*1915";
 
-            DBManager dbManager = new DBManager(dbUrl, dbUser, dbPassword);
-            CollectionManager collectionManager = new CollectionManager();
+            DBManager dbManager = new DBManager(dbUrlLocal, dbUserLocal, dbPasswordLocal);
+            CollectionManager collectionManager = new CollectionManager(dbManager);
             CommandManager commandManager = createCommandManager(collectionManager);
 
             collectionManager.loadFromDB();
             logger.info("Loaded {} items", collectionManager.getList().size());
 
             RequestReader requestReader = new RequestReader();
-            CommandExecutor commandExecutor = new CommandExecutor(commandManager);
+            CommandExecutor commandExecutor = new CommandExecutor(commandManager, dbManager);
 
             DatagramChannel channel = DatagramChannel.open();
             channel.configureBlocking(false);
@@ -100,7 +103,7 @@ public class ServerMain {
         commandManager.register("print_descending", new PrintDescendingCommand(collectionManager));
         commandManager.register("execute_script", new ExecuteScriptCommand(commandManager));
 
-        commandManager.register("server_save", new ServerSaveCommand(collectionManager));
+        // commandManager.register("server_save", new ServerSaveCommand(collectionManager));
 
         return commandManager;
     }

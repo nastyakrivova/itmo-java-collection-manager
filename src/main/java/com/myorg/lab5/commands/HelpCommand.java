@@ -16,7 +16,7 @@ public class HelpCommand implements Command{
     }
 
     @Override
-    public void execute(String arg[]){
+    public void execute(String arg[], int userId){
         commandManager.printHelp();
     }
 

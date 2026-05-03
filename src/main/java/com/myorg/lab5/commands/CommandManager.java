@@ -35,7 +35,7 @@ public class CommandManager {
      * 
      * @param input строка ввода от пользователя или из скрипта
      */
-    public boolean execute(String input){
+    public boolean execute(String input, int userId){
         if(input == null || input.trim().isEmpty()){return false;}
         String[] line = input.trim().split("\\s+");
         String commandName = line[0];
@@ -45,25 +45,25 @@ public class CommandManager {
         Command command = commands.get(commandName);
         if (command == null) { return false; }
 
-        command.execute(args);
+        command.execute(args, userId);
         return true;
     }
 
-    public boolean execute(String commandName, String[] args){
+    public boolean execute(String commandName, String[] args, int userId){
         Command command = commands.get(commandName);
         if (command == null) {
             return false;
         }
-        command.execute(args);
+        command.execute(args, userId);
         return true;
     }
 
-    public String executeAndGetResult(String commanddName, String[] args) {
+    public String executeAndGetResult(String commanddName, String[] args, int userId) {
         Command command = commands.get(commanddName);
         if(command == null) {
             return null;
         }
-        return command.executeAndReturn(args);
+        return command.executeAndReturn(args, userId);
     }
 
     public void printHelp(){

@@ -23,7 +23,7 @@ public class UpdateIdCommand implements Command{
      * @param args массив аргументов, где args[0] - ID обновляемого элемента
      */
     @Override
-    public void execute(String[] args){
+    public void execute(String[] args, int userId){
 
         if (args.length == 0) {
             System.out.println("Ошибка: не указан ID. Использование: update <id>");
@@ -35,7 +35,7 @@ public class UpdateIdCommand implements Command{
             
             if (collectionManager.containsId(id)){
                 MusicBand updatedMusicBand = parser.parse(args[1]);
-                collectionManager.updateId(id, updatedMusicBand);
+                collectionManager.updateId(id, updatedMusicBand, userId);
                 System.out.println("Music band with id: " + id + " has been updated");
             } else {
                 System.out.println("Id not found: " + id);

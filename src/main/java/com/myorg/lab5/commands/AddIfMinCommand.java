@@ -28,7 +28,7 @@ public class AddIfMinCommand implements Command{
      * меньше наименьшего текущего элемента.
      */
     @Override
-    public void execute(String[] args){
+    public void execute(String[] args, int userId){
         MusicBand band = lineParser.parse(args[0]);
         collectionManager.addIfMin(band);
     }

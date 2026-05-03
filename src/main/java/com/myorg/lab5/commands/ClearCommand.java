@@ -19,7 +19,7 @@ public class ClearCommand implements Command{
     }
 
     @Override
-    public void execute(String args[]){
+    public void execute(String args[], int userId){
         collectionManager.clear();
     }
 

@@ -6,9 +6,10 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import com.myorg.lab5.data_exchange.Batch;
 
-import com.myorg.lab5.CommandResponse;
-import com.myorg.lab5.SerializationUtil;
+import com.myorg.lab5.data_exchange.CommandResponse;
+import com.myorg.lab5.data_exchange.SerializationUtil;
 
 
 public class ResponseSender {
@@ -31,6 +32,17 @@ public class ResponseSender {
             }
         } catch(IOException e){
             e.getMessage();
+        }
+    }
+
+    public void send(Batch batch, SocketAddress clientAddress){
+        try{
+            byte[] batchData = SerializationUtil.serialize(batch);
+            ByteBuffer buffer = ByteBuffer.wrap(batchData);
+            int sent  =channel.send(buffer, clientAddress);
+            logger.info("Batch sent: {} bytes, {} responses", sent, batch.getResponses().size());
+        }catch (IOException e) {
+            logger.error("Failed to send batch: {}", e.getMessage());
         }
     }
 }

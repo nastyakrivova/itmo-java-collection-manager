@@ -19,10 +19,10 @@ public class RemoveById implements Command{
      * @param args массив аргументов, где args[0] - ID элемента для удаления
      */
     @Override
-    public void execute(String[] args){
+    public void execute(String[] args, int userId){
         try {
             int id = Integer.parseInt(args[0]);
-            boolean removed = collectionManager.removeById(id);
+            boolean removed = collectionManager.removeById(id, userId);
             
             if (removed) {
                 System.out.println("Element with id " + id + " removed successfully");

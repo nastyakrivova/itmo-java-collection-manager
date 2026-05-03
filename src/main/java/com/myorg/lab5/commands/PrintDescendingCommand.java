@@ -25,7 +25,7 @@ public class PrintDescendingCommand implements Command{
     }
 
     @Override
-    public void execute(String args[]){
+    public void execute(String args[], int userId){
         List<MusicBand> sortedList = new ArrayList<>(collectionManager.getList());
         sortedList.sort(Comparator.reverseOrder());
 
@@ -35,7 +35,7 @@ public class PrintDescendingCommand implements Command{
     }
 
     @Override
-    public String executeAndReturn(String[] args){
+    public String executeAndReturn(String[] args, int userId){
         return collectionManager.getList().stream()
             .sorted(Comparator.reverseOrder())
             .map(MusicBand::toString)

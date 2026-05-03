@@ -16,7 +16,7 @@ public interface Command {
      * @param args массив аргументов команды. 
      *             Может быть пустым для команд без аргументов.
      */
-    public void execute(String[] args);
+    public void execute(String[] args, int userId);
     
     /**
      * Возвращает описание команды для отображения в справке.
@@ -27,13 +27,13 @@ public interface Command {
     public String getDescription();
 
     
-    default String executeAndReturn(String[] args) {
+    default String executeAndReturn(String[] args, int userId) {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         PrintStream originalOut = System.out;
 
         try {
             System.setOut(new PrintStream(buffer));
-            execute(args);
+            execute(args, userId);
             return buffer.toString().trim();
         } finally {
             System.setOut(originalOut);

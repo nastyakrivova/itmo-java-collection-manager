@@ -20,7 +20,7 @@ public class CountByStudioCommand implements Command {
      * @param args массив аргументов, где args[0] - название студии (опционально)
      */
     @Override
-    public void execute(String args[]){
+    public void execute(String args[], int userId){
         System.out.println(String.valueOf(collectionManager.countByStudio(new Studio(args[0]))));
     }
 

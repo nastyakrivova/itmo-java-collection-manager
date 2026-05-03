@@ -14,7 +14,7 @@ public class ExitCommand implements Command{
      * Выводит сообщение и вызывает {@link System#exit(int)}.
      */
     @Override
-    public void execute(String[] args) {
+    public void execute(String[] args, int userId) {
         consoleManager.show("Exiting...");
         System.exit(0);
     }

@@ -4,9 +4,9 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
-import com.myorg.lab5.CommandRequest;
-import com.myorg.lab5.CommandResponse;
-import com.myorg.lab5.SerializationUtil;
+import com.myorg.lab5.data_exchange.CommandRequest;
+import com.myorg.lab5.data_exchange.CommandResponse;
+import com.myorg.lab5.data_exchange.SerializationUtil;
 
 public class NetworkClient implements AutoCloseable {
 

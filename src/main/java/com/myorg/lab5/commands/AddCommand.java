@@ -24,9 +24,9 @@ public class AddCommand implements Command{
      * Парсит введенные пользователем данные и добавляет новый элемент в коллекцию.
      */
     @Override
-    public void execute(String[] args){
+    public void execute(String[] args, int userId){
         MusicBand band = lineParser.parse(args[0]);
-        collectionManager.add(band);
+        collectionManager.add(band, userId);
     }
 
     /**

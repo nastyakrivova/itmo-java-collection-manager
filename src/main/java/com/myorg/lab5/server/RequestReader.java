@@ -1,7 +1,8 @@
 package com.myorg.lab5.server;
 
-import com.myorg.lab5.CommandRequest;
-import com.myorg.lab5.SerializationUtil;
+import com.myorg.lab5.data_exchange.CommandRequest;
+import com.myorg.lab5.data_exchange.SerializationUtil;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
