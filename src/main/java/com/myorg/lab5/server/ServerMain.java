@@ -44,10 +44,11 @@ public class ServerMain {
         try{
             // // Для кафедральной БД
             String dbUrl = "jdbc:postgresql://pg/studs";
-            // String dbUser = "s502501";
+            String dbUser = "s502501";
             // String dbPassword = "BTJH*1915";
-            String dbUser = "";
-            String dbPassword = "";
+            // String dbUser = "";
+            // String dbPassword = "";
+            String dbPassword = "vxTj72Ecz4qlSlv6";
             DBManager dbManager = new DBManager(dbUrl, dbUser, dbPassword);
 
             // ИЛИ для локальной БД (закомментируйте кафедральную)
