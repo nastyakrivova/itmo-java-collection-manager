@@ -158,8 +158,30 @@ public class CollectionManager {
         }
     }
 
-    public void removeGreater(MusicBand musicBand){
-        list.removeIf(i -> i.compareTo(musicBand) > 0);
+    public OperationResult removeGreater(MusicBand musicBand, int userId){
+        synchronized(list){
+            List<MusicBand> greaterBands = list.stream()
+                .filter(b -> b.compareTo(musicBand) > 0)
+                .collect(Collectors.toList());
+
+            if (greaterBands == null){
+                return OperationResult.NOT_FOUND;
+            }
+            try{
+                for(MusicBand band: greaterBands){
+                    if(band.getOwnerId() == userId){
+                        dbManager.deleteMusicBand(band.getId(), userId);
+                        list.remove(list.indexOf(band));
+                        return OperationResult.SUCCESS;
+                    }
+                }
+            } catch (SQLException e) {
+                logger.error("Error clearing: " + e.getMessage());
+            }
+            return OperationResult.ERROR;
+
+
+        }
     }
 
     public void removeLower(MusicBand musicBand){

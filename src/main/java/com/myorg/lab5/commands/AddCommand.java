@@ -19,10 +19,17 @@ public class AddCommand implements Command {
             return;
         }
         
+        System.out.println("=== ADD COMMAND DEBUG ===");//cut!!
+        System.out.println("args.length = " + args.length);//cut
+        for (int i = 0; i < args.length; i++) {//cut
+            System.out.println("args[" + i + "] = \"" + args[i] + "\"");//cut
+        }//cut
+
         try {
             String bandData = args[0];
+            System.out.println("Received: " + bandData);//cut!!!
             MusicBand band = parser.parse(bandData);
-            
+
             if (band == null) {
                 System.out.println("Error: Invalid band data format");
                 return;

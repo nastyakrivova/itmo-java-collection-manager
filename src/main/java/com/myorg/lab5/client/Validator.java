@@ -10,7 +10,7 @@ public class Validator {
         "print_descending", "execute_script");
     
     private static final Set<String> numericCommands = Set.of(
-        "remove_by_id", "count_by_studio", "filter_less_than_number_of_participants"
+        "remove_by_id", "filter_less_than_number_of_participants"
     );
 
     public boolean isValidCommand(String commandName){
