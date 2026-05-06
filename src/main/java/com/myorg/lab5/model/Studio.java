@@ -6,8 +6,14 @@ public class Studio implements Serializable{
     private static final long serialVersionUID = 1L;
     private String name; 
 
-    public Studio(String name){
-        setName(name);
+    public Studio(String name) {
+
+        if (name == null || name.trim().isEmpty()) {
+            System.out.println("-> throwing exception!");
+            throw new IllegalArgumentException("Studio name cannot be null or empty");
+        }
+        this.name = name;
+        System.out.println("-> studio created with name = \"" + this.name + "\"");
     }
 
     public void setName(String name){

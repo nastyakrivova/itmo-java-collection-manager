@@ -18,6 +18,7 @@ import com.myorg.lab5.commands.CountByStudioCommand;
 import com.myorg.lab5.commands.ExecuteScriptCommand;
 import com.myorg.lab5.commands.HelpCommand;
 import com.myorg.lab5.commands.InfoCommand;
+import com.myorg.lab5.commands.MyShowCommand;
 import com.myorg.lab5.commands.PrintDescendingCommand;
 import com.myorg.lab5.commands.FilterLessThenNumOfPart;
 import com.myorg.lab5.commands.RemoveById;
@@ -36,26 +37,21 @@ public class ServerMain {
     public static void main(String[] args){
         logger.info("Server initialization...\n");
 
-        // String fileName = System.getenv("DATA");
-        // if(fileName == null){
-        //     logger.error("Environment variable DATA not set");
-        // }
-
         try{
             // // Для кафедральной БД
-            String dbUrl = "jdbc:postgresql://pg/studs";
-            String dbUser = "s502501";
-            // String dbPassword = "BTJH*1915";
-            // String dbUser = "";
-            // String dbPassword = "";
-            String dbPassword = "vxTj72Ecz4qlSlv6";
-            DBManager dbManager = new DBManager(dbUrl, dbUser, dbPassword);
+            // String dbUrl = "jdbc:postgresql://pg/studs";
+            // String dbUser = "s502501";
+            // // String dbPassword = "BTJH*1915";
+            // // String dbUser = "";
+            // // String dbPassword = "";
+            // String dbPassword = "vxTj72Ecz4qlSlv6";
+            // DBManager dbManager = new DBManager(dbUrl, dbUser, dbPassword);
 
-            // ИЛИ для локальной БД (закомментируйте кафедральную)
-            // String dbUrlLocal = "jdbc:postgresql://localhost:5432/testlab7";
-            // String dbUserLocal = "postgres";
-            // String dbPasswordLocal = "3013";
-            // DBManager dbManager = new DBManager(dbUrlLocal, dbUserLocal, dbPasswordLocal);
+            // для локальной БД 
+            String dbUrlLocal = "jdbc:postgresql://localhost:5432/testlab7";
+            String dbUserLocal = "postgres";
+            String dbPasswordLocal = "3013";
+            DBManager dbManager = new DBManager(dbUrlLocal, dbUserLocal, dbPasswordLocal);
 
             CollectionManager collectionManager = new CollectionManager(dbManager);
             CommandManager commandManager = createCommandManager(collectionManager);
@@ -74,16 +70,11 @@ public class ServerMain {
 
             ConnectionListener connectionListener = new ConnectionListener(channel, requestReader, commandExecutor, responseSender);
 
-            // Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            //     logger.info("Saving collection...");
-            //     collectionManager.save();
-            //     try{
-            //         channel.close();
-            //     } catch(Exception e){
-            //         logger.error("Error during closing channel", e);
-            //     }
-                
-            // }));
+
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                logger.info("Finishing...");
+                connectionListener.stop();
+            }));
 
             connectionListener.start();
         }catch (IOException e) {
@@ -104,15 +95,15 @@ public class ServerMain {
         commandManager.register("add", new AddCommand(collectionManager));
         commandManager.register("add_if_min", new AddIfMinCommand(collectionManager));
         commandManager.register("update", new UpdateIdCommand(collectionManager));
-        commandManager.register("check_update", new CheckUpdateCommand(collectionManager));        commandManager.register("remove_by_id", new RemoveById(collectionManager));
+        commandManager.register("check_update", new CheckUpdateCommand(collectionManager));       
+        commandManager.register("remove_by_id", new RemoveById(collectionManager));
         commandManager.register("remove_greater", new RemoveGreaterCommand(collectionManager));
         commandManager.register("remove_lower", new RemoveLowerCommand(collectionManager));
         commandManager.register("count_by_studio", new CountByStudioCommand(collectionManager));
         commandManager.register("filter_less_than_number_of_participants", new FilterLessThenNumOfPart(collectionManager));
         commandManager.register("print_descending", new PrintDescendingCommand(collectionManager));
         commandManager.register("execute_script", new ExecuteScriptCommand(commandManager));
-
-        // commandManager.register("server_save", new ServerSaveCommand(collectionManager));
+        commandManager.register("my_show", new MyShowCommand(collectionManager));
 
         return commandManager;
     }

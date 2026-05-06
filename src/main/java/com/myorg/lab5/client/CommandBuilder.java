@@ -37,7 +37,6 @@ public class CommandBuilder {
             return null;
         }
 
-        // ========== ADD ==========
         if (commandName.equals("add") ||
             commandName.equals("remove_greater") ||
             commandName.equals("remove_lower") ||
@@ -45,15 +44,24 @@ public class CommandBuilder {
 
             consoleManager.show("Создание нового элемента\n");
             MusicBand band = interactiveParser.parseInteractively();
+
             if (band == null) {
                 consoleManager.show("Ошибка при создании объекта");
                 return null;
             }
+
+            System.out.println("DEBUG CLIENT: band = " + band);
+            System.out.println("DEBUG CLIENT: band.getStudio() = " + band.getStudio());
+            System.out.println("DEBUG CLIENT: studio name = " + (band.getStudio() != null ? band.getStudio().getName() : "NULL"));
+
+
             String bandData = interactiveParser.toCsv(band);
+
+            System.out.println("DEBUG CLIENT: bandData = " + bandData);  // ← это самое важное
+
             return new CommandRequest(commandName, new Object[]{bandData}, login, password);
         }
 
-        // ========== EXECUTE_SCRIPT ==========
         if (commandName.equals("execute_script")) {
             if (!validator.validateExecuteScriptArgs(argsString)) {
                 consoleManager.show("Ошибка: укажите путь к скрипту (.txt)");
@@ -62,7 +70,6 @@ public class CommandBuilder {
             return new CommandRequest(commandName, new Object[]{argsString}, login, password);
         }
 
-        // ========== UPDATE ==========
         if (commandName.equals("update")) {
             if (argsString == null || argsString.isEmpty()) {
                 consoleManager.show("Error: Usage: update <id>");
@@ -77,11 +84,9 @@ public class CommandBuilder {
                 return null;
             }
             
-            // Отправляем check_update
             return new CommandRequest("check_update", new Object[]{id}, login, password);
         }
 
-        // ========== ЧИСЛОВЫЕ КОМАНДЫ ==========
         if (validator.isValidNumCommand(commandName)) {
             if (!validator.validNumericalArg(argsString)) {
                 consoleManager.show("Ошибка: требуется число");
@@ -90,7 +95,6 @@ public class CommandBuilder {
             return new CommandRequest(commandName, new Object[]{argsString}, login, password);
         }
 
-        // ========== ОСТАЛЬНЫЕ КОМАНДЫ ==========
         if (argsString.isEmpty()) {
             return new CommandRequest(commandName, login, password);
         } else {

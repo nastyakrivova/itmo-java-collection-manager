@@ -7,7 +7,7 @@ public class Validator {
         "help", "info", "show", "add", "update", "remove_by_id",
         "clear", "add_if_min", "remove_greater", "remove_lower",
         "count_by_studio", "filter_less_than_number_of_participants",
-        "print_descending", "execute_script");
+        "print_descending", "execute_script", "my_show");
     
     private static final Set<String> numericCommands = Set.of(
         "remove_by_id", "filter_less_than_number_of_participants"

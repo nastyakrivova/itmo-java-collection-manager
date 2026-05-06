@@ -1,6 +1,7 @@
 package com.myorg.lab5.commands;
 
 import com.myorg.lab5.model.CollectionManager;
+import com.myorg.lab5.model.CollectionManager.OperationResult;
 import com.myorg.lab5.model.MusicBand;
 import com.myorg.lab5.utils.ScriptParser;
 
@@ -24,7 +25,17 @@ public class RemoveGreaterCommand implements Command{
     @Override
     public void execute(String[] args, int userId){
         MusicBand band = lineParser.parse(args[0]);
-        collectionManager.removeGreater(band, userId);
+        OperationResult result = collectionManager.removeGreater(band, userId);
+        switch (result) {
+            case NOT_FOUND:
+                System.out.println("No greater bands found");
+                break;
+            case SUCCESS:
+                System.out.println("Greater bands removed successfully");
+                break;
+            default:
+                System.out.println("Error removing greater bands");
+        }
     }
 
     @Override

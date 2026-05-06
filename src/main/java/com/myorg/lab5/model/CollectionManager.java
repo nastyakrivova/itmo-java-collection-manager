@@ -3,6 +3,7 @@ package com.myorg.lab5.model;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Comparator;
 import java.util.stream.Collectors;
@@ -13,21 +14,18 @@ import com.myorg.lab5.server.DBManager;
 
 public class CollectionManager {
     private static final Logger logger = LogManager.getLogger(CollectionManager.class);
-    private final ArrayList<MusicBand> list;
+    private final List<MusicBand> list = Collections.synchronizedList(new ArrayList<MusicBand>());
     // private FileManager fileManager;
     private final LocalDate initDate;
     private DBManager dbManager;
 
     public CollectionManager(DBManager dbManager){
-        this.list = new ArrayList<MusicBand>();
         this.dbManager = dbManager;
         this.initDate = LocalDate.now();
         loadFromDB();
     }
 
     public CollectionManager(){
-        this.list = new ArrayList<MusicBand>();
-        // this.fileManager = new FileManager("data.csv");
         this.initDate = LocalDate.now();
     }
 
@@ -158,39 +156,83 @@ public class CollectionManager {
         }
     }
 
-    public OperationResult removeGreater(MusicBand musicBand, int userId){
+    public String showUsersElements(int userId){
         synchronized(list){
-            List<MusicBand> greaterBands = list.stream()
-                .filter(b -> b.compareTo(musicBand) > 0)
+            List<MusicBand> usersList = list.stream()
+                .filter(b -> b.getOwnerId() == userId)
                 .collect(Collectors.toList());
 
-            if (greaterBands == null){
-                return OperationResult.NOT_FOUND;
+            if (usersList.isEmpty()) {
+            return "You didn't add any band";
             }
-            try{
-                for(MusicBand band: greaterBands){
-                    if(band.getOwnerId() == userId){
-                        dbManager.deleteMusicBand(band.getId(), userId);
-                        list.remove(list.indexOf(band));
-                        return OperationResult.SUCCESS;
-                    }
-                }
-            } catch (SQLException e) {
-                logger.error("Error clearing: " + e.getMessage());
-            }
-            return OperationResult.ERROR;
 
-
+            return usersList.stream()
+                .sorted(Comparator.comparing(MusicBand::getName))
+                .map(MusicBand::toString)
+                .collect(Collectors.joining("\n"));
         }
     }
 
-    public void removeLower(MusicBand musicBand){
-        list.removeIf(i -> i.compareTo(musicBand) < 0);
+    public OperationResult removeGreater(MusicBand musicBand, int userId) {
+        synchronized(list) {
+            List<Integer> idsToRemove = list.stream()
+                .filter(b -> b.getOwnerId() == userId && b.compareTo(musicBand) > 0)
+                .map(MusicBand::getId)
+                .collect(Collectors.toList());
+            
+            if (idsToRemove.isEmpty()) {
+                return OperationResult.NOT_FOUND;
+            }
+            
+            try {
+                for (int id : idsToRemove) {
+                    dbManager.deleteMusicBand(id, userId);
+                }
+                list.removeIf(b -> b.getOwnerId() == userId && b.compareTo(musicBand) > 0);
+                logger.info("User {} removed {} greater bands", userId, idsToRemove.size());
+                return OperationResult.SUCCESS;
+            } catch (SQLException e) {
+                logger.error("Error removing greater bands: " + e.getMessage());
+                return OperationResult.ERROR;
+            }
+        }
     }
 
-    public int countByStudio(Studio studio){
-        return (int)list.stream()
-            .filter(band -> studio.equals(band.getStudio()))
+    public OperationResult removeLower(MusicBand musicBand, int userId) {
+        synchronized(list) {
+            List<Integer> idsToRemove = list.stream()
+                .filter(b -> b.getOwnerId() == userId && b.compareTo(musicBand) < 0)
+                .map(MusicBand::getId)
+                .collect(Collectors.toList());
+            
+            if (idsToRemove.isEmpty()) {
+                return OperationResult.NOT_FOUND;
+            }
+            
+            try {
+                for (int id : idsToRemove) {
+                    dbManager.deleteMusicBand(id, userId);
+                }
+                list.removeIf(b -> b.getOwnerId() == userId && b.compareTo(musicBand) < 0);
+                logger.info("User {} removed {} lower bands", userId, idsToRemove.size());
+                return OperationResult.SUCCESS;
+            } catch (SQLException e) {
+                logger.error("Error removing lower bands: " + e.getMessage());
+                return OperationResult.ERROR;
+            }
+        }
+    }
+
+    public int countByStudio(Studio studio) {
+        if (studio == null) {
+            return (int) list.stream()
+                .filter(band -> band.getStudio() == null)
+                .count();
+        }
+        
+        String targetName = studio.getName();
+        return (int) list.stream()
+            .filter(band -> band.getStudio() != null && targetName.equals(band.getStudio().getName()))
             .count();
     }
 
@@ -222,10 +264,13 @@ public class CollectionManager {
     }
 }
 
-    public ArrayList<MusicBand> getList(){
-        return list;
+    public List<MusicBand> getList() {
+        synchronized(list) {
+            return new ArrayList<>(list);
+        }
     }
 
+    
     public void loadFromDB(){
         try{
             ArrayList<MusicBand> loaded = dbManager.loadAllMusicBands();

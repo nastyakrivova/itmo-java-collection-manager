@@ -30,7 +30,6 @@ public class UpdateIdCommand implements Command {
                 return;
             }
             
-            // Ещё раз проверяем владельца (на случай, если вызывают без check_update)
             MusicBand existing = collectionManager.getBandById(id);
             if (existing == null) {
                 System.out.println("Element with id " + id + " not found");

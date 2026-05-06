@@ -22,7 +22,6 @@ public class MusicBandParser {
         this.interactive = false;
     }
     
-    // ========== ПАРСИНГ ИЗ СТРОКИ ==========
     public MusicBand parseFromString(String line) {
         List<String> fields = parseCsvLine(line);
         return buildFromFields(fields);
@@ -69,8 +68,11 @@ public class MusicBandParser {
         MusicGenre genre = MusicGenre.valueOf(data[5].trim().toUpperCase());
         
         Studio studio = null;
-        if (data.length > 6 && !data[6].trim().isEmpty()) {
-            studio = new Studio(data[6].trim());
+        if (data.length > 6 && data[6] != null && !data[6].trim().isEmpty()) {
+            String studioName = data[6].trim();
+            if (!studioName.equals("null")) { 
+                studio = new Studio(studioName);
+            }
         }
         
         Integer singlesCount = null;
@@ -81,7 +83,6 @@ public class MusicBandParser {
         return new MusicBand(name, coordinates, numOfPart, albumsCount, genre, studio, singlesCount);
     }
     
-    // ========== ИНТЕРАКТИВНЫЙ ПАРСИНГ ==========
     public MusicBand parseInteractively() {
         if (!interactive) throw new IllegalStateException("Not in interactive mode");
         
@@ -103,7 +104,6 @@ public class MusicBandParser {
         return new MusicBand(name, coordinates, participants, albums, genre, studio, singles);
     }
     
-    // ========== ПРЕОБРАЗОВАНИЕ В CSV ==========
     public String toCsv(MusicBand band) {
         StringBuilder sb = new StringBuilder();
         sb.append(band.getName()).append(",");
@@ -112,12 +112,20 @@ public class MusicBandParser {
         sb.append(band.getNumberOfParticipants()).append(",");
         sb.append(band.getAlbumsCount()).append(",");
         sb.append(band.getGenre());
-        sb.append(",").append(band.getStudio() != null ? band.getStudio().getName() : "");
+        
+        String studioName = "";
+        if (band.getStudio() != null) {
+            String name = band.getStudio().getName();
+            if (name != null && !name.equals("null") && !name.isEmpty()) {
+                studioName = name;
+            }
+        }
+        sb.append(",").append(studioName);
+        
         sb.append(",").append(band.getSinglesCount() != null ? band.getSinglesCount() : "");
         return sb.toString();
     }
     
-    // ========== ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ ==========
     private String readString(String prompt, java.util.function.Predicate<String> validator, String errorMsg) {
         while (true) {
             System.out.print(prompt);
@@ -161,7 +169,20 @@ public class MusicBandParser {
     private Studio readOptionalStudio() {
         System.out.print("Studio name (press Enter to skip): ");
         String input = scanner.nextLine().trim();
-        return input.isEmpty() ? null : new Studio(input);
+        
+        System.out.println("=== DEBUG readOptionalStudio ===");
+        System.out.println("input = \"" + input + "\"");
+        System.out.println("input.length() = " + input.length());
+        System.out.println("input.isEmpty() = " + input.isEmpty());
+        System.out.println("input.equals(\"null\") = " + input.equals("null"));
+        
+        if (input.isEmpty() || input.equals("null")) {
+            System.out.println("-> returning null");
+            return null;
+        }
+        Studio studio = new Studio(input);
+        System.out.println("-> created studio: " + studio.getName());
+        return studio;
     }
     
     private Integer readOptionalInt(String fieldName) {

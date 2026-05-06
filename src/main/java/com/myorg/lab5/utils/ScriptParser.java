@@ -56,11 +56,15 @@ public class ScriptParser{
         String genreStr = data[5].trim().toUpperCase();
         MusicGenre genre = MusicGenre.valueOf(genreStr);
 
-        String studioName = data[6].trim();
         Studio studio = null;
-        if (!studioName.isEmpty()) {
-            studio = new Studio(studioName);
+        if (data.length > 6 && data[6] != null && !data[6].trim().isEmpty()) {
+            String studioName = data[6].trim();
+            if (!studioName.equals("null")) {
+                studio = new Studio(studioName);
+            }
         }
+        System.out.println("DEBUG PARSER: data[6] = " + (data.length > 6 ? data[6] : "NOT EXIST"));
+        System.out.println("DEBUG PARSER: studio created = " + (studio != null ? studio.getName() : "NULL"));
     
         String singlesStr = data[7].trim();
         Integer singlesCount = null;

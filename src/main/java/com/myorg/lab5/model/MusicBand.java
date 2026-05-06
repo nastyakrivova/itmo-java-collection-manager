@@ -131,6 +131,7 @@ public class MusicBand implements Comparable<MusicBand>, Serializable{
             studio != null ? studio.getName() : "не указана");
     }
 
+
     @Override
     public int compareTo(MusicBand other) {
         return Integer.compare(this.numberOfParticipants, other.numberOfParticipants);

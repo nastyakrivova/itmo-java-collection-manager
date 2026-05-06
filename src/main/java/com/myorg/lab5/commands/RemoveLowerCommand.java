@@ -1,6 +1,7 @@
 package com.myorg.lab5.commands;
 
 import com.myorg.lab5.model.CollectionManager;
+import com.myorg.lab5.model.CollectionManager.OperationResult;
 import com.myorg.lab5.model.MusicBand;
 import com.myorg.lab5.utils.ScriptParser;
 
@@ -25,7 +26,17 @@ public class RemoveLowerCommand implements Command{
     public void execute(String[] args, int userId){
 
         MusicBand band = lineParser.parse(args[0]);
-        collectionManager.removeLower(band);
+        OperationResult result = collectionManager.removeLower(band, userId);
+        switch (result) {
+            case NOT_FOUND:
+                System.out.println("No lower bands found");
+                break;
+            case SUCCESS:
+                System.out.println("Lower bands removed successfully");
+                break;
+            default:
+                System.out.println("Error removing lower bands");
+        }
     }
 
     @Override

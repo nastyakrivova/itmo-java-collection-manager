@@ -27,7 +27,7 @@ public class ConnectionListener {
     private final ResponseSender responseSender;
 
     private final DatagramChannel channel;
-    private boolean running = true;
+    private volatile boolean running = true;
 
     private final ExecutorService processingPool;
     private final ForkJoinPool responsePool;

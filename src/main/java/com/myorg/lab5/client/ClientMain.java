@@ -17,7 +17,6 @@ public class ClientMain {
     public static void main(String[] args) {
         System.out.println("Клиент запущен...");
 
-        // Создаём Scanner для ввода с консоли
         Scanner scanner = new Scanner(System.in);
         
         ConsoleManager consoleManager = new ConsoleManager(scanner);
@@ -29,7 +28,6 @@ public class ClientMain {
         try (NetworkClient networkClient = new NetworkClient(SERVER_HOST, SERVER_PORT)) {
             consoleManager.show("Подключение установлено");
             
-            // Аутентификация
             while (!authenticateUser(consoleManager, networkClient, scanner)) {
                 String retry = consoleManager.read("Повторить попытку? (y/n): ");
                 if (!"y".equalsIgnoreCase(retry)) {
@@ -41,7 +39,6 @@ public class ClientMain {
             consoleManager.show("Авторизация успешна!");
             consoleManager.show("Введите help для списка команд");
 
-            // Основной цикл команд
             while (true) {
                 try {
                     String input = consoleManager.read();
@@ -64,7 +61,6 @@ public class ClientMain {
                         continue;
                     }
                     
-                    // Обработка check_update
                     if (request.getCommandName().equals("check_update")) {
                         CommandResponse response = networkClient.sendCommand(request);
                         String msg = response.getMessage();
@@ -100,7 +96,6 @@ public class ClientMain {
                         continue;
                     }
                     
-                    // Обычная отправка команд
                     CommandResponse response = networkClient.sendCommand(request);
                     responsePrinter.print(response);
 
@@ -120,9 +115,15 @@ public class ClientMain {
 
     private static boolean authenticateUser(ConsoleManager consoleManager, NetworkClient networkClient, Scanner scanner) {
         try {
-            consoleManager.show("\n=== АВТОРИЗАЦИЯ ===");
-            String choice = consoleManager.read("1 - Вход | 2 - Регистрация: ");
-            
+            consoleManager.show("\n АВТОРИЗАЦИЯ");
+            String choice = null;
+            while (choice == null) {
+                choice = consoleManager.read("1 - Вход | 2 - Регистрация: ");
+                if (!"1".equals(choice) && !"2".equals(choice)) {
+                    consoleManager.show("Неверный выбор. Введите 1 или 2");
+                    choice = null;
+                }
+            }
             String login = consoleManager.read("Логин: ");
             String password = consoleManager.read("Пароль: ");
             
