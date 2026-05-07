@@ -159,5 +159,44 @@
         </plugin>
       </plugins>
     </pluginManagement>
+    <plugins>
+        <!-- Реальное использование плагина -->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <executions>
+                <execution>
+                    <id>server</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>shade</goal>
+                    </goals>
+                    <configuration>
+                        <outputFile>target/server.jar</outputFile>
+                        <transformers>
+                            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                <mainClass>com.myorg.lab5.server.ServerMain</mainClass>
+                            </transformer>
+                        </transformers>
+                    </configuration>
+                </execution>
+                <execution>
+                    <id>client</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>shade</goal>
+                    </goals>
+                    <configuration>
+                        <outputFile>target/client.jar</outputFile>
+                        <transformers>
+                            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                <mainClass>com.myorg.lab5.client.ClientMain</mainClass>
+                            </transformer>
+                        </transformers>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
   </build>
 </project>
