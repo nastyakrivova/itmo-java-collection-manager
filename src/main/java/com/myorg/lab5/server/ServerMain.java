@@ -38,20 +38,12 @@ public class ServerMain {
         logger.info("Server initialization...\n");
 
         try{
-            // Для кафедральной БД
+
             String dbUrl = "jdbc:postgresql://pg/studs";
             String dbUser = "s502501";
-            // String dbPassword = "BTJH*1915";
-            // String dbUser = "";
-            // String dbPassword = "";
             String dbPassword = "vxTj72Ecz4qlSlv6";
             DBManager dbManager = new DBManager(dbUrl, dbUser, dbPassword);
 
-            // // для локальной БД 
-            // String dbUrlLocal = "jdbc:postgresql://localhost:5432/testlab7";
-            // String dbUserLocal = "postgres";
-            // String dbPasswordLocal = "3013";
-            // DBManager dbManager = new DBManager(dbUrlLocal, dbUserLocal, dbPasswordLocal);
 
             CollectionManager collectionManager = new CollectionManager(dbManager);
             CommandManager commandManager = createCommandManager(collectionManager);

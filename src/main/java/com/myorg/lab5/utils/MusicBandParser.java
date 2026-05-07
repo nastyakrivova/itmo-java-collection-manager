@@ -170,18 +170,11 @@ public class MusicBandParser {
         System.out.print("Studio name (press Enter to skip): ");
         String input = scanner.nextLine().trim();
         
-        System.out.println("=== DEBUG readOptionalStudio ===");
-        System.out.println("input = \"" + input + "\"");
-        System.out.println("input.length() = " + input.length());
-        System.out.println("input.isEmpty() = " + input.isEmpty());
-        System.out.println("input.equals(\"null\") = " + input.equals("null"));
-        
         if (input.isEmpty() || input.equals("null")) {
             System.out.println("-> returning null");
             return null;
         }
         Studio studio = new Studio(input);
-        System.out.println("-> created studio: " + studio.getName());
         return studio;
     }
     
