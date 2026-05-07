@@ -13,7 +13,6 @@ public class Studio implements Serializable{
             throw new IllegalArgumentException("Studio name cannot be null or empty");
         }
         this.name = name;
-        System.out.println("-> studio created with name = \"" + this.name + "\"");
     }
 
     public void setName(String name){

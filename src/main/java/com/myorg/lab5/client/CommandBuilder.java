@@ -50,15 +50,7 @@ public class CommandBuilder {
                 return null;
             }
 
-            System.out.println("DEBUG CLIENT: band = " + band);
-            System.out.println("DEBUG CLIENT: band.getStudio() = " + band.getStudio());
-            System.out.println("DEBUG CLIENT: studio name = " + (band.getStudio() != null ? band.getStudio().getName() : "NULL"));
-
-
             String bandData = interactiveParser.toCsv(band);
-
-            System.out.println("DEBUG CLIENT: bandData = " + bandData);  // ← это самое важное
-
             return new CommandRequest(commandName, new Object[]{bandData}, login, password);
         }
 
