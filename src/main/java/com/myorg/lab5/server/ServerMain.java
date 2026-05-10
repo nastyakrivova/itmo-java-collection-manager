@@ -94,7 +94,6 @@ public class ServerMain {
         commandManager.register("count_by_studio", new CountByStudioCommand(collectionManager));
         commandManager.register("filter_less_than_number_of_participants", new FilterLessThenNumOfPart(collectionManager));
         commandManager.register("print_descending", new PrintDescendingCommand(collectionManager));
-        commandManager.register("execute_script", new ExecuteScriptCommand(commandManager));
         commandManager.register("my_show", new MyShowCommand(collectionManager));
 
         return commandManager;

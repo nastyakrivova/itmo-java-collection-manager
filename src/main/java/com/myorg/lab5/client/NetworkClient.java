@@ -3,7 +3,10 @@ package com.myorg.lab5.client;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.myorg.lab5.data_exchange.Batch;
 import com.myorg.lab5.data_exchange.CommandRequest;
 import com.myorg.lab5.data_exchange.CommandResponse;
 import com.myorg.lab5.data_exchange.SerializationUtil;
@@ -11,38 +14,95 @@ import com.myorg.lab5.data_exchange.SerializationUtil;
 public class NetworkClient implements AutoCloseable {
 
     private static final int TIMEOUT = 5000;
-    private static final int BUFFER_SIZE = 8192;
+    private static final int BUFFER_SIZE = 65535;
+    private static final int BATCH_SIZE = 10; 
 
     private final DatagramSocket socket;
     private final InetAddress serverAddress;
     private final int serverPort;
 
-    public NetworkClient(String host, int port) throws Exception{
+    public NetworkClient(String host, int port) throws Exception {
         this.socket = new DatagramSocket();
         this.serverAddress = InetAddress.getByName(host);
         this.serverPort = port;
         this.socket.setSoTimeout(TIMEOUT);
     }
 
-    public CommandResponse sendCommand(CommandRequest request) throws Exception{
-
+    public CommandResponse sendCommand(CommandRequest request) throws Exception {
         byte[] requestData = SerializationUtil.serialize(request);
-        DatagramPacket sendPacket = new DatagramPacket(requestData, requestData.length, serverAddress, serverPort);
+        DatagramPacket sendPacket = new DatagramPacket(requestData, requestData.length,
+                serverAddress, serverPort);
         socket.send(sendPacket);
-
 
         byte[] receiveBuffer = new byte[BUFFER_SIZE];
         DatagramPacket receivePacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
         socket.receive(receivePacket);
 
-        byte[] dataRespose = new byte[receivePacket.getLength()];
-        System.arraycopy(receivePacket.getData(), 0, dataRespose, 0, receivePacket.getLength());
+        byte[] dataResponse = new byte[receivePacket.getLength()];
+        System.arraycopy(receivePacket.getData(), 0, dataResponse, 0, receivePacket.getLength());
 
-        return (CommandResponse) SerializationUtil.deserialize(dataRespose);
+        return (CommandResponse) SerializationUtil.deserialize(dataResponse);
+    }
+
+    public List<CommandResponse> sendScript(List<CommandRequest> allRequests) throws Exception {
+        if (allRequests == null || allRequests.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        List<Batch> batches = splitIntoBatches(allRequests);
+        System.out.println("Скрипт разбит на " + batches.size() + " батчей (по " + BATCH_SIZE + " команд)");
+        List<CommandResponse> allResponses = new ArrayList<>();
+        
+        for (int i = 0; i < batches.size(); i++) {
+            Batch batch = batches.get(i);
+            
+            System.out.println("Отправка батча " + (i+1) + "/" + batches.size() + 
+                              " (" + batch.getRequests().size() + " команд)");
+            
+            byte[] requestData = SerializationUtil.serialize(batch);
+            DatagramPacket sendPacket = new DatagramPacket(requestData, requestData.length,
+                    serverAddress, serverPort);
+            socket.send(sendPacket);
+            
+            byte[] receiveBuffer = new byte[BUFFER_SIZE];
+            DatagramPacket receivePacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
+            socket.receive(receivePacket);
+            
+            byte[] dataResponse = new byte[receivePacket.getLength()];
+            System.arraycopy(receivePacket.getData(), 0, dataResponse, 0, receivePacket.getLength());
+            
+            Batch responseBatch = (Batch) SerializationUtil.deserialize(dataResponse);
+            
+            System.out.println("Получен ответ на батч " + (i+1) + "/" + batches.size() +
+                              " (" + responseBatch.getResponses().size() + " ответов)");
+            
+            allResponses.addAll(responseBatch.getResponses());
+        }
+        
+        System.out.println("✅ Получены все ответы: " + allResponses.size() + " шт.");
+        
+        return allResponses;
+    }
+ 
+    private List<Batch> splitIntoBatches(List<CommandRequest> requests) {
+        List<Batch> batches = new ArrayList<>();
+        
+        for (int i = 0; i < requests.size(); i += BATCH_SIZE) {
+            int end = Math.min(i + BATCH_SIZE, requests.size());
+            List<CommandRequest> batchRequests = requests.subList(i, end);
+            
+            Batch batch = new Batch();
+            batch.setSequenceNumber(batches.size());
+            batch.setTotalBatches((requests.size() + BATCH_SIZE - 1) / BATCH_SIZE);
+            batch.setRequests(new ArrayList<>(batchRequests));
+            batches.add(batch);
+        }
+        
+        return batches;
     }
 
     @Override
-    public void close(){
+    public void close() {
         socket.close();
     }
 }

@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 public class CommandResponse implements Serializable{
     private static final long serialVersionUID = 1L;
+    private int requestId;
     private final boolean success;
     private final String message;
     private final Object data;
@@ -12,6 +13,7 @@ public class CommandResponse implements Serializable{
         this.data = data;
         this.success = success;
         this.message = message;
+        this.requestId = -1;
     }
 
     public static CommandResponse success(String message){
@@ -37,6 +39,9 @@ public class CommandResponse implements Serializable{
     public Object getData() {
         return data;
     }
+
+    public int getRequestId() { return requestId; }
+    public void setRequestId(int requestId) { this.requestId = requestId; }
     
     @Override
     public String toString() {

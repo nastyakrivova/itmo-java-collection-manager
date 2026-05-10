@@ -1,38 +1,38 @@
 package com.myorg.lab5.commands;
 
-
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * Команда выполнения скрипта из файла.
- * Читает команды из указанного файла и выполняет их последовательно.
- * Защищает от рекурсивного выполнения скриптов.
- * Использует BufferedInputStream для чтения файла согласно требованиям.
- */
-public class ExecuteScriptCommand implements Command{
-    private final CommandManager commandManager;
+import com.myorg.lab5.client.CommandBuilder;
+import com.myorg.lab5.client.NetworkClient;
+import com.myorg.lab5.data_exchange.CommandRequest;
+import com.myorg.lab5.data_exchange.CommandResponse;
 
-    public ExecuteScriptCommand(CommandManager commandManager){
-        this.commandManager = commandManager;
+public class ExecuteScriptCommand {
+    
+    private final NetworkClient networkClient;
+    private final CommandBuilder commandBuilder;
+    private final String login;
+    private final String password;
+    
+    public ExecuteScriptCommand(NetworkClient networkClient, 
+                                CommandBuilder commandBuilder,
+                                String login, 
+                                String password) {
+        this.networkClient = networkClient;
+        this.commandBuilder = commandBuilder;
+        this.login = login;
+        this.password = password;
     }
     
-    /**
-     * Выполняет скрипт из файла.
-     * Переключает парсер в режим чтения из файла, выполняет все команды,
-     * затем возвращает парсер в консольный режим.
-     * 
-     * @param args массив аргументов, где args[0] - имя файла скрипта
-     */
-    @Override
-    public void execute(String[] args, int userId){
-        if (args.length < 1) {
-            System.out.println("Error: Please specify script file name");
-            return;
-        }
-        try (BufferedReader reader = new BufferedReader(new FileReader(args[0]))) {
+    public void execute(String fileName) {
+        List<CommandRequest> allRequests = new ArrayList<>();
+        int lineNum = 0;
+        
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
             String line;
-            int lineNum = 0;
             
             while ((line = reader.readLine()) != null) {
                 lineNum++;
@@ -42,20 +42,35 @@ public class ExecuteScriptCommand implements Command{
                     continue;
                 }
                 
-                boolean success = commandManager.execute(line, userId);
-                if (!success) {
-                    System.err.println("Ошибка выполнения: строки " + lineNum +  ":" + line);
+                CommandRequest request = commandBuilder.build(line, login, password);
+                if (request == null) {
+                    System.err.println("Ошибка парсинга строки " + lineNum);
+                    return;
                 }
+                
+                allRequests.add(request);
             }
-        }catch(Exception e){
-            System.out.println("Ошибка чтения файла: " + e.getMessage());
+            
+            if (allRequests.isEmpty()) {
+                System.out.println("Скрипт не содержит команд");
+                return;
+            }
+            
+            System.out.println("\nВсего команд: " + allRequests.size());
+            List<CommandResponse> allResponses = networkClient.sendScript(allRequests);
+            
+            System.out.println("\n РЕЗУЛЬТАТЫ:");
+            for (int i = 0; i < allResponses.size(); i++) {
+                CommandResponse resp = allResponses.get(i);
+                CommandRequest req = allRequests.get(i);
+                System.out.println("  " + (i+1) + ". " + req.getCommandName() + 
+                                   ": " + resp.getMessage());
+            }
+            
+            System.out.println("\nСкрипт выполнен!");
+            
+        } catch (Exception e) {
+            System.err.println("Ошибка: " + e.getMessage());
         }
-    }
-
-
-
-    @Override
-    public String getDescription(){
-        return "-Execute commands from script file (usage: execute_script filename)";
     }
 }

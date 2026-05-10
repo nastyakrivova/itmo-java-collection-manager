@@ -3,6 +3,7 @@ package com.myorg.lab5.client;
 import java.net.SocketTimeoutException;
 import java.util.Scanner;
 
+import com.myorg.lab5.commands.ExecuteScriptCommand;
 import com.myorg.lab5.data_exchange.CommandRequest;
 import com.myorg.lab5.data_exchange.CommandResponse;
 import com.myorg.lab5.io.ConsoleManager;
@@ -36,12 +37,30 @@ public class ClientMain {
                 }
             }
             
-            consoleManager.show("Авторизация успешна!");
+            consoleManager.show("успешно!");
             consoleManager.show("Введите help для списка команд");
 
             while (true) {
                 try {
                     String input = consoleManager.read();
+
+
+                    if (input.trim().startsWith("execute_script")) {
+                        String[] parts = input.trim().split("\\s+", 2);
+                        if (parts.length < 2) {
+                            consoleManager.show("Ошибка: укажите имя файла");
+                            continue;
+                        }
+                        
+                        ExecuteScriptCommand scriptCmd = new ExecuteScriptCommand(
+                            networkClient, 
+                            commandBuilder, 
+                            currentLogin, 
+                            currentPassword
+                        );
+                        scriptCmd.execute(parts[1]);
+                        continue;
+                    }
 
                     if (input == null || input.equals("exit")) {
                         consoleManager.show("Завершение работы клиента...");

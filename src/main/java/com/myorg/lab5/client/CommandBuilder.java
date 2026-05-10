@@ -42,12 +42,20 @@ public class CommandBuilder {
             commandName.equals("remove_lower") ||
             commandName.equals("add_if_min")) {
 
-            consoleManager.show("Создание нового элемента\n");
-            MusicBand band = interactiveParser.parseInteractively();
-
-            if (band == null) {
-                consoleManager.show("Ошибка при создании объекта");
-                return null;
+            MusicBand band;
+            if (argsString != null && !argsString.isEmpty()) {
+                band = scriptParser.parseFromString(argsString);
+                if (band == null) {
+                    consoleManager.show("Ошибка при парсинге данных: " + argsString);
+                    return null;
+                }
+            } else {
+                consoleManager.show("Создание нового элемента\n");
+                band = interactiveParser.parseInteractively();
+                if (band == null) {
+                    consoleManager.show("Ошибка при создании объекта");
+                    return null;
+                }
             }
 
             String bandData = interactiveParser.toCsv(band);

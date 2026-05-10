@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 public class CommandRequest implements Serializable{
     private static final long serialVersionUID = 1L;
+    private int requestId;
     private final String commandName;
     private final Object[] args;
     private final String login;
@@ -15,6 +16,7 @@ public class CommandRequest implements Serializable{
         this.commandName = commandName;
         this.login = login;
         this.password = password;
+        this.requestId = -1;
     }
 
     public CommandRequest(String commandName, String login, String password) {
@@ -37,6 +39,9 @@ public class CommandRequest implements Serializable{
     public String getPassword(){
         return password;
     }
+
+    public int getRequestId() { return requestId; }
+    public void setRequestId(int requestId) { this.requestId = requestId; }
 
     @Override
     public String toString() {
