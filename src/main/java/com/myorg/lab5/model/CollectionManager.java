@@ -15,7 +15,6 @@ import com.myorg.lab5.server.DBManager;
 public class CollectionManager {
     private static final Logger logger = LogManager.getLogger(CollectionManager.class);
     private final List<MusicBand> list = Collections.synchronizedList(new ArrayList<MusicBand>());
-    // private FileManager fileManager;
     private final LocalDate initDate;
     private DBManager dbManager;
 

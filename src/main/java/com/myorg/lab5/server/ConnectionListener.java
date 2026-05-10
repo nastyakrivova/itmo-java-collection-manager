@@ -29,7 +29,7 @@ public class ConnectionListener {
     private final DatagramChannel channel;
     private volatile boolean running = true;
 
-    private final ExecutorService processingPool;
+    private final ExecutorService readingPool;
     private final ForkJoinPool responsePool;
 
     public ConnectionListener(DatagramChannel channel, 
@@ -42,7 +42,7 @@ public class ConnectionListener {
         this.channel = channel;
 
         int cores = Runtime.getRuntime().availableProcessors();
-        this.processingPool = Executors.newFixedThreadPool(cores*2);
+        this.readingPool = Executors.newFixedThreadPool(cores*2);
         this.responsePool = ForkJoinPool.commonPool();
         logger.info("ConnectionListener initialized with {} processing threads", cores * 2);
     }
@@ -62,7 +62,11 @@ public class ConnectionListener {
                     buffer.get(data);
                     logger.info("\n Package received from: " + clientAddress);
 
-                    processingPool.submit(() -> handleRequest(data, clientAddress));
+                    readingPool.submit(() ->{
+                        Thread handlerThread = new Thread(() -> processRequest(data, clientAddress));
+                        handlerThread.start();
+                    });
+
                 }
 
             } catch (Exception e) {
@@ -74,8 +78,10 @@ public class ConnectionListener {
         }
     }
 
-    private void handleRequest(byte[] data, SocketAddress clientAddress){
+    private void processRequest(byte[] data, SocketAddress clientAddress){
         try{
+            logger.info("[{}] Начало обработки запроса от {}", 
+                Thread.currentThread().getName(), clientAddress);
             Object obj = SerializationUtil.deserialize(data);
             if(obj instanceof Batch){
                 Batch batch = (Batch) obj;

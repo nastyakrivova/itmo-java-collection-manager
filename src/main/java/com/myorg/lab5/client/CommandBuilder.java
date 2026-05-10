@@ -16,7 +16,7 @@ public class CommandBuilder {
         this.consoleManager = consoleManager;
         this.validator = validator;
         this.interactiveParser = new MusicBandParser(scanner);
-        this.scriptParser = new MusicBandParser(); // без сканера
+        this.scriptParser = new MusicBandParser();
     }
 
     public CommandRequest build(String input, String login, String password) {
