@@ -79,7 +79,7 @@ public class NetworkClient implements AutoCloseable {
             allResponses.addAll(responseBatch.getResponses());
         }
         
-        System.out.println("✅ Получены все ответы: " + allResponses.size() + " шт.");
+        System.out.println("Получены все ответы: " + allResponses.size() + " шт.");
         
         return allResponses;
     }

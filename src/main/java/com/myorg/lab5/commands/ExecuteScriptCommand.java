@@ -59,7 +59,7 @@ public class ExecuteScriptCommand {
             System.out.println("\nВсего команд: " + allRequests.size());
             List<CommandResponse> allResponses = networkClient.sendScript(allRequests);
             
-            System.out.println("\n РЕЗУЛЬТАТЫ:");
+            System.out.println("\n Результаты:");
             for (int i = 0; i < allResponses.size(); i++) {
                 CommandResponse resp = allResponses.get(i);
                 CommandRequest req = allRequests.get(i);
