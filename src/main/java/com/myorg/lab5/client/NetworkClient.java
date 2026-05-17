@@ -43,7 +43,7 @@ public class NetworkClient implements AutoCloseable {
                 serverAddress, serverPort);
         socket.send(sendPacket);
 
-        socket.setSoTimeout(5000);
+        // socket.setSoTimeout(5000);
 
         byte[] receiveBuffer = new byte[BUFFER_SIZE];
         DatagramPacket receivePacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
