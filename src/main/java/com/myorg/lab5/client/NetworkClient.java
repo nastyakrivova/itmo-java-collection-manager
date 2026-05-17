@@ -114,6 +114,8 @@ public class NetworkClient implements AutoCloseable {
         }
         
         System.out.println("Получены все ответы: " + allResponses.size() + " шт.");
+
+        clearSocketBuffer();
         
         return allResponses;
     }
