@@ -16,7 +16,7 @@ import com.myorg.lab5.data_exchange.SerializationUtil;
 
 public class NetworkClient implements AutoCloseable {
 
-    private static final int TIMEOUT = 30000;
+    private static final int TIMEOUT = 60000;
     private static final int BUFFER_SIZE = 65535;
     private static final int BATCH_SIZE = 10; 
 
