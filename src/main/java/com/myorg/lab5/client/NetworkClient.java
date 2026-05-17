@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +23,7 @@ public class NetworkClient implements AutoCloseable {
     private final DatagramSocket socket;
     private final InetAddress serverAddress;
     private final int serverPort;
+    private int nextRequestId = 0;
 
     public NetworkClient(String host, int port) throws Exception {
         this.socket = new DatagramSocket();
@@ -32,12 +34,16 @@ public class NetworkClient implements AutoCloseable {
 
     public CommandResponse sendCommand(CommandRequest request) throws Exception {
 
+        int requestId = nextRequestId++;
+        request.setRequestId(requestId);
         clearSocketBuffer();
 
         byte[] requestData = SerializationUtil.serialize(request);
         DatagramPacket sendPacket = new DatagramPacket(requestData, requestData.length,
                 serverAddress, serverPort);
         socket.send(sendPacket);
+
+        socket.setSoTimeout(5000);
 
         byte[] receiveBuffer = new byte[BUFFER_SIZE];
         DatagramPacket receivePacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
@@ -46,12 +52,23 @@ public class NetworkClient implements AutoCloseable {
         byte[] dataResponse = new byte[receivePacket.getLength()];
         System.arraycopy(receivePacket.getData(), 0, dataResponse, 0, receivePacket.getLength());
 
-        return (CommandResponse) SerializationUtil.deserialize(dataResponse);
+        CommandResponse response = (CommandResponse) SerializationUtil.deserialize(dataResponse);
+
+        if (response.getRequestId() != -1 && response.getRequestId() != request.getRequestId()) {
+            throw new IOException("Получен ответ на другой запрос! Ожидался " + 
+                                request.getRequestId() + ", получен " + response.getRequestId());
+        }
+        
+        return response;
     }
 
     public List<CommandResponse> sendScript(List<CommandRequest> allRequests) throws Exception {
         if (allRequests == null || allRequests.isEmpty()) {
             return new ArrayList<>();
+        }
+
+        for (CommandRequest request : allRequests) {
+            request.setRequestId(nextRequestId++);
         }
         
         List<Batch> batches = splitIntoBatches(allRequests);
@@ -127,7 +144,7 @@ public class NetworkClient implements AutoCloseable {
             while (true){
                 socket.receive(packet);
             }
-        } catch (SocketException e) {
+        } catch (SocketTimeoutException e) {
 
         } finally {
             socket.setSoTimeout(TIMEOUT);

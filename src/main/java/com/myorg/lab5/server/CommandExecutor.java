@@ -24,40 +24,45 @@ public class CommandExecutor {
         Object[] args = request.getArgs();
         String login = request.getLogin();
         String password = request.getPassword();
+        int requestId = request.getRequestId();
 
         if (commandName.equals("login")){
-            return handleLogin(args);
+            return addRequestId(handleLogin(args), requestId);
         }
         if (commandName.equals("register")){
-            return handleRegiser(args);
+            return addRequestId(handleRegiser(args), requestId);
         }
         
 
         if (login == null || password == null || login.isEmpty() || password.isEmpty()) {
-            return CommandResponse.error("Not authenticated. Please login first.");
+            return addRequestId(CommandResponse.error("Not authenticated. Please login first."), requestId);
         }
         
         Integer userId;
         try {
             userId = dbManager.authentication(login, password);
             if (userId == null) {
-                return CommandResponse.error("Invalid credentials. Please login again.");
+                return addRequestId(CommandResponse.error("Invalid credentials. Please login again."), requestId);
             }
         } catch (Exception e) {
             logger.error("Authentication error: {}", e.getMessage());
-            return CommandResponse.error("Authentication error: " + e.getMessage());
+            return addRequestId(CommandResponse.error("Authentication error: " + e.getMessage()), requestId);
         }
         
         String[] stringArgs = toStringArgs(args);
         String result = commandManager.executeAndGetResult(commandName, stringArgs, userId);
         
+        CommandResponse response;
         if (result == null) {
-            return CommandResponse.error("Command execution failed");
+            response = CommandResponse.error("Command execution failed");
+        } else if (result.isEmpty()) {
+            response = CommandResponse.success("Команда выполнена");
+        } else {
+            response = CommandResponse.success(result);
         }
-        if (result.isEmpty()) {
-            return CommandResponse.success("Команда выполнена");
-        }
-        return CommandResponse.success(result);
+
+        response.setRequestId(requestId);
+        return response;
         
     }
 
@@ -118,5 +123,12 @@ public class CommandExecutor {
             logger.error("Registration error: {}", e.getMessage());
             return CommandResponse.error("Registration error: " + e.getMessage());
         }
+    }
+
+    private CommandResponse addRequestId(CommandResponse response, int requestId) {
+        if (response != null) {
+            response.setRequestId(requestId);
+        }
+        return response;
     }
 }
