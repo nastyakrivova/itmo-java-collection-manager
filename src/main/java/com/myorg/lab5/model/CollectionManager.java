@@ -247,10 +247,16 @@ public class CollectionManager {
             return "Collection is empty";
             }
 
-            return list.stream()
+            int maxDisplay = 20;
+            StringBuilder sb = new StringBuilder();
+            sb.append("=== Показаны первые ").append(maxDisplay).append(" из ").append(list.size()).append(" элементов ===\n");
+            
+            list.stream()
                 .sorted(Comparator.comparing(MusicBand::getName))
-                .map(MusicBand::toString)
-                .collect(Collectors.joining("\n"));
+                .limit(maxDisplay)
+                .forEach(band -> sb.append(band.toString()).append("\n"));
+            
+            return sb.toString();
         }
     }
 
