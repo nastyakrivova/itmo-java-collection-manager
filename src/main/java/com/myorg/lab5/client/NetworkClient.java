@@ -1,8 +1,10 @@
 package com.myorg.lab5.client;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +31,9 @@ public class NetworkClient implements AutoCloseable {
     }
 
     public CommandResponse sendCommand(CommandRequest request) throws Exception {
+
+        clearSocketBuffer();
+
         byte[] requestData = SerializationUtil.serialize(request);
         DatagramPacket sendPacket = new DatagramPacket(requestData, requestData.length,
                 serverAddress, serverPort);
@@ -71,12 +76,24 @@ public class NetworkClient implements AutoCloseable {
             byte[] dataResponse = new byte[receivePacket.getLength()];
             System.arraycopy(receivePacket.getData(), 0, dataResponse, 0, receivePacket.getLength());
             
-            Batch responseBatch = (Batch) SerializationUtil.deserialize(dataResponse);
+            Object obj = SerializationUtil.deserialize(dataResponse);
             
-            System.out.println("Получен ответ на батч " + (i+1) + "/" + batches.size() +
-                              " (" + responseBatch.getResponses().size() + " ответов)");
+            List<CommandResponse> batchResponses = new ArrayList<>();
             
-            allResponses.addAll(responseBatch.getResponses());
+            if (obj instanceof Batch) {
+                Batch responseBatch = (Batch) obj;
+                batchResponses = responseBatch.getResponses();
+                System.out.println("Получен батч ответов: " + batchResponses.size());
+            } 
+            else if (obj instanceof CommandResponse) {
+                batchResponses.add((CommandResponse) obj);
+                System.out.println("Получен одиночный ответ");
+            }
+            else {
+                System.err.println("Неизвестный тип ответа: " + obj.getClass().getName());
+                continue;
+            }
+            allResponses.addAll(batchResponses);
         }
         
         System.out.println("Получены все ответы: " + allResponses.size() + " шт.");
@@ -99,6 +116,22 @@ public class NetworkClient implements AutoCloseable {
         }
         
         return batches;
+    }
+
+
+    private void clearSocketBuffer() throws IOException {
+        byte[] buffer = new byte[65535];
+        DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+        socket.setSoTimeout(1);
+        try {
+            while (true){
+                socket.receive(packet);
+            }
+        } catch (SocketException e) {
+
+        } finally {
+            socket.setSoTimeout(TIMEOUT);
+        }
     }
 
     @Override
