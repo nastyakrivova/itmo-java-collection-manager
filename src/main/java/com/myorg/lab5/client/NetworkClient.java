@@ -7,7 +7,9 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.myorg.lab5.data_exchange.Batch;
 import com.myorg.lab5.data_exchange.CommandRequest;
@@ -73,10 +75,12 @@ public class NetworkClient implements AutoCloseable {
         
         List<Batch> batches = splitIntoBatches(allRequests);
         System.out.println("Скрипт разбит на " + batches.size() + " батчей (по " + BATCH_SIZE + " команд)");
-        List<CommandResponse> allResponses = new ArrayList<>();
-        
+        Map<Integer, List<CommandResponse>> delayedResponses = new HashMap<>();
+        List<CommandResponse> allResponses = new ArrayList<>();    
+
         for (int i = 0; i < batches.size(); i++) {
             Batch batch = batches.get(i);
+            int expectedSeqNum = batch.getSequenceNumber();
             
             System.out.println("Отправка батча " + (i+1) + "/" + batches.size() + 
                               " (" + batch.getRequests().size() + " команд)");
@@ -96,9 +100,12 @@ public class NetworkClient implements AutoCloseable {
             Object obj = SerializationUtil.deserialize(dataResponse);
             
             List<CommandResponse> batchResponses = new ArrayList<>();
+            int receivedSeqNum = -1;
             
+            // проверка, что вообще пришло
             if (obj instanceof Batch) {
                 Batch responseBatch = (Batch) obj;
+                receivedSeqNum = responseBatch.getSequenceNumber();
                 batchResponses = responseBatch.getResponses();
                 System.out.println("Получен батч ответов: " + batchResponses.size());
             } 
@@ -110,15 +117,35 @@ public class NetworkClient implements AutoCloseable {
                 System.err.println("Неизвестный тип ответа: " + obj.getClass().getName());
                 continue;
             }
-            allResponses.addAll(batchResponses);
+
+            //  проверка порядка приходящих батчей
+            if (receivedSeqNum == expectedSeqNum) {
+                allResponses.addAll(batchResponses);
+                
+                int nextSeq = expectedSeqNum + 1;
+                while (delayedResponses.containsKey(nextSeq)) {
+                    allResponses.addAll(delayedResponses.remove(nextSeq));
+                    nextSeq++;
+                }
+            } else if (receivedSeqNum > expectedSeqNum) {
+                System.err.println("Батч #" + receivedSeqNum + " пришёл раньше #" + expectedSeqNum + " (буферизация)");
+                delayedResponses.put(receivedSeqNum, batchResponses);
+            } else {
+                System.err.println("Игнорируем дубликат/старый батч #" + receivedSeqNum);
+            }
         }
-        
+
+        if (!delayedResponses.isEmpty()) {
+            System.err.println("Не получены батчи: " + delayedResponses.keySet());
+        }
         System.out.println("Получены все ответы: " + allResponses.size() + " шт.");
 
         clearSocketBuffer();
-        
-        return allResponses;
+        return allResponses;   
     }
+        
+
+
  
     private List<Batch> splitIntoBatches(List<CommandRequest> requests) {
         List<Batch> batches = new ArrayList<>();
