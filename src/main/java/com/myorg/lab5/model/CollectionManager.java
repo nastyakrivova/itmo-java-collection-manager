@@ -11,11 +11,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.myorg.lab5.server.DBManager;
+import com.myorg.lab5.utils.MusicBandParser;
 
 public class CollectionManager {
     private static final Logger logger = LogManager.getLogger(CollectionManager.class);
     private final List<MusicBand> list = Collections.synchronizedList(new ArrayList<MusicBand>());
     private final LocalDate initDate;
+    private final MusicBandParser parser = new MusicBandParser();
     private DBManager dbManager;
 
     public CollectionManager(DBManager dbManager){
@@ -241,22 +243,33 @@ public class CollectionManager {
             .collect(Collectors.toList());
     }
 
-    public String showElements(){
-        synchronized(list){
-            if (list.isEmpty()) {
-            return "Collection is empty";
-            }
+    // public String showElements(){
+    //     synchronized(list){
+    //         if (list.isEmpty()) {
+    //         return "Collection is empty";
+    //         }
 
-            int maxDisplay = 20;
-            StringBuilder sb = new StringBuilder();
-            sb.append("=== Показаны первые ").append(maxDisplay).append(" из ").append(list.size()).append(" элементов ===\n");
+    //         int maxDisplay = 20;
+    //         StringBuilder sb = new StringBuilder();
+    //         sb.append("Показаны первые ").append(maxDisplay).append(" из ").append(list.size()).append(" элементов\n");
             
-            list.stream()
-                .sorted(Comparator.comparing(MusicBand::getName))
-                .limit(maxDisplay)
-                .forEach(band -> sb.append(band.toString()).append("\n"));
+    //         list.stream()
+    //             .sorted(Comparator.comparing(MusicBand::getName))
+    //             .limit(maxDisplay)
+    //             .forEach(band -> sb.append(band.toString()).append("\n"));
             
-            return sb.toString();
+    //         return sb.toString();
+    //     }
+    // }
+
+    public String showElements() {
+        synchronized(list) {
+            if (list.isEmpty()) {
+                return "";
+            }
+            return list.stream()
+                .<String>map(band -> parser.toCsv(band)) 
+                .collect(Collectors.joining("\n"));
         }
     }
 

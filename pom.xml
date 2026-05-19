@@ -58,6 +58,17 @@
         <artifactId>postgresql</artifactId>
         <version>42.7.3</version>
     </dependency>
+    <!-- JavaFX dependencies -->
+    <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-controls</artifactId>
+        <version>21</version>
+    </dependency>
+    <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-fxml</artifactId>
+        <version>21</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -160,6 +171,14 @@
       </plugins>
     </pluginManagement>
     <plugins>
+        <plugin>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-maven-plugin</artifactId>
+            <version>0.0.8</version>
+            <configuration>
+                <mainClass>com.myorg.lab5.client.gui.MainApp</mainClass>
+            </configuration>
+        </plugin>
         <!-- Реальное использование плагина -->
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>

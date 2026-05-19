@@ -94,7 +94,7 @@ public class CommandExecutor {
         try {
             Integer userId = dbManager.authentication(login, password);
             if (userId != null) {
-                return CommandResponse.success("Login successful. Welcome, " + login + "!");
+                return CommandResponse.success("Login successful. Welcome, " + login + "! UserId:" + userId);
             } else {
                 return CommandResponse.error("Login failed: invalid username or password");
             }

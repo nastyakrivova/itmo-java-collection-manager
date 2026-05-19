@@ -79,8 +79,16 @@ public class MusicBandParser {
         if (data.length > 7 && !data[7].trim().isEmpty()) {
             singlesCount = Integer.parseInt(data[7].trim());
         }
+
+        int ownerId = 0;
+        if (data.length > 8 && !data[8].trim().isEmpty()) {
+            ownerId = Integer.parseInt(data[8].trim());
+        }
+
+        MusicBand band = new MusicBand(name, coordinates, numOfPart, albumsCount, genre, studio, singlesCount);
+        band.setOwnerId(ownerId);
         
-        return new MusicBand(name, coordinates, numOfPart, albumsCount, genre, studio, singlesCount);
+        return band;
     }
     
     public MusicBand parseInteractively() {
@@ -123,6 +131,7 @@ public class MusicBandParser {
         sb.append(",").append(studioName);
         
         sb.append(",").append(band.getSinglesCount() != null ? band.getSinglesCount() : "");
+        sb.append(",").append(band.getOwnerId());
         return sb.toString();
     }
     
