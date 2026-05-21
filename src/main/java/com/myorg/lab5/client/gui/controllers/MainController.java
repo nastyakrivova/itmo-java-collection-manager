@@ -1,37 +1,30 @@
 package com.myorg.lab5.client.gui.controllers;
 
 import com.myorg.lab5.client.gui.MainApp;
-import com.myorg.lab5.data_exchange.CommandRequest;
-import com.myorg.lab5.data_exchange.CommandResponse;
+import com.myorg.lab5.client.gui.drawing.AnimationHelper;
+import com.myorg.lab5.client.gui.drawing.AnimationManager;
+import com.myorg.lab5.client.gui.drawing.BandDrawer;
+import com.myorg.lab5.client.gui.BandService;
+import com.myorg.lab5.client.gui.utils_gui.DataParser;
+import com.myorg.lab5.client.gui.utils_gui.DialogManager;
+import com.myorg.lab5.client.gui.table.TableManager;
+import com.myorg.lab5.client.gui.utils_gui.LocalizationManager;
 import com.myorg.lab5.model.MusicBand;
-import com.myorg.lab5.model.MusicGenre;
-import com.myorg.lab5.model.Studio;
-import com.myorg.lab5.utils.MusicBandParser;
-
 import javafx.application.Platform;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
-import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class MainController {
     
+    // UI элементы
     @FXML private TableView<MusicBand> bandsTable;
     @FXML private TableColumn<MusicBand, Integer> idCol;
     @FXML private TableColumn<MusicBand, String> nameCol;
@@ -42,271 +35,360 @@ public class MainController {
     @FXML private TableColumn<MusicBand, Integer> singlesCol;
     @FXML private TableColumn<MusicBand, String> studioCol;
     @FXML private TableColumn<MusicBand, LocalDate> creationDateCol;
-    
     @FXML private Canvas canvas;
-    
-    @FXML private Button refreshBtn;
-    @FXML private Button addBtn;
-    @FXML private Button editBtn;
-    @FXML private Button deleteBtn;
-    @FXML private Button clearBtn;
-    
     @FXML private TextField filterField;
     @FXML private Label userLabel;
+    @FXML private Button refreshBtn, addBtn, editBtn, deleteBtn, clearBtn;
+    @FXML private Button infoBtn, addIfMinBtn, removeGreaterBtn, removeLowerBtn;
+    @FXML private Button countByStudioBtn, executeScriptBtn;
+    @FXML private Menu languageMenu;
     
+    // Сервисы
     private MainApp mainApp;
-    private ObservableList<MusicBand> bandData = FXCollections.observableArrayList();
-    private FilteredList<MusicBand> filteredData;
-    private SortedList<MusicBand> sortedData;
+    private BandService bandService;
+    private DataParser dataParser;
+    private DialogManager dialogManager;
+    private TableManager tableManager;
+    private BandDrawer bandDrawer;
+    private AnimationManager animationManager;
+    private LocalizationManager lang = LocalizationManager.getInstance();
     
     public void setMainApp(MainApp mainApp) {
         this.mainApp = mainApp;
-        userLabel.setText(mainApp.getCurrentLogin() + " (id=" + mainApp.getCurrentUserId() + ")");
+        this.bandService = new BandService(mainApp);
+        this.dataParser = new DataParser();
+        this.dialogManager = new DialogManager(mainApp);
+        
+        this.tableManager = new TableManager(bandsTable, idCol, nameCol, participantsCol,
+            albumsCol, genreCol, ownerCol, singlesCol, studioCol, creationDateCol, filterField);
+        this.bandDrawer = new BandDrawer(canvas, mainApp.getCurrentUserId());
+
+        this.animationManager = new AnimationManager(canvas, gc -> {
+            for (MusicBand band : tableManager.getAllData()) {
+                drawBand(gc, band);
+            }
+        });
+        
+        refreshTexts();
+        refreshData();
     }
     
     @FXML
     private void initialize() {
-        idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-        nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
-        participantsCol.setCellValueFactory(new PropertyValueFactory<>("numberOfParticipants"));
-        albumsCol.setCellValueFactory(new PropertyValueFactory<>("albumsCount"));
-        genreCol.setCellValueFactory(new PropertyValueFactory<>("genre"));
-        ownerCol.setCellValueFactory(new PropertyValueFactory<>("ownerId"));
-        singlesCol.setCellValueFactory(new PropertyValueFactory<>("singlesCount"));
-        studioCol.setCellValueFactory(new PropertyValueFactory<>("studio"));
-        creationDateCol.setCellValueFactory(new PropertyValueFactory<>("creationDate"));
-        studioCol.setCellValueFactory(cellData -> {
-            Studio studio = cellData.getValue().getStudio();
-            return new SimpleStringProperty(studio != null ? studio.getName() : "");
-        });
-                        
-        // фильтрация
-        filteredData = new FilteredList<>(bandData, p -> true);
-        sortedData = new SortedList<>(filteredData);
-        sortedData.comparatorProperty().bind(bandsTable.comparatorProperty());
-        bandsTable.setItems(sortedData);
-        
-        filterField.textProperty().addListener((observable, oldValue, newValue) -> {
-            filteredData.setPredicate(band -> {
-                if (newValue == null || newValue.isEmpty()) return true;
-                String lowerFilter = newValue.toLowerCase();
-                return band.getName().toLowerCase().contains(lowerFilter) ||
-                       String.valueOf(band.getId()).contains(lowerFilter);
-            });
-        });
-        
+        // Основные команды
         refreshBtn.setOnAction(e -> refreshData());
         addBtn.setOnAction(e -> showAddDialog());
-        editBtn.setOnAction(e -> editSelectedBand());
-        deleteBtn.setOnAction(e -> deleteSelectedBand());
+        editBtn.setOnAction(e -> editSelected());
+        deleteBtn.setOnAction(e -> deleteSelected());
         clearBtn.setOnAction(e -> clearCollection());
         
-        canvas.setOnMouseClicked(e -> onCanvasClick(e.getX(), e.getY()));
+        // Дополнительные команды
+        infoBtn.setOnAction(e -> showInfo());
+        addIfMinBtn.setOnAction(e -> showAddIfMinDialog());
+        removeGreaterBtn.setOnAction(e -> showRemoveGreaterDialog());
+        removeLowerBtn.setOnAction(e -> showRemoveLowerDialog());
+        countByStudioBtn.setOnAction(e -> showCountByStudioDialog());
+        executeScriptBtn.setOnAction(e -> executeScript());
         
-        refreshData();
+        canvas.setOnMouseClicked(e -> onCanvasClick(e.getX(), e.getY()));
+    }
+
+    private void drawBand(GraphicsContext gc, MusicBand band) {
+        double x = band.getCoordinates().getX();
+        double y = band.getCoordinates().getY();
+        double size = 10 + band.getNumberOfParticipants() / 4;
+        Color color = bandDrawer.getColorForOwner(band.getOwnerId());
+        
+        gc.setFill(color);
+        gc.fillOval(x, y, size, size);
+        gc.setFill(Color.BLACK);
+        gc.fillText(band.getName(), x, y - 5);
+    }
+    
+    public void refreshTexts() {
+        // Кнопки
+        refreshBtn.setText(lang.get("main.refresh"));
+        addBtn.setText(lang.get("cmd.add"));
+        editBtn.setText(lang.get("cmd.edit"));
+        deleteBtn.setText(lang.get("cmd.delete"));
+        clearBtn.setText(lang.get("cmd.clear"));
+        infoBtn.setText(lang.get("cmd.info"));
+        addIfMinBtn.setText(lang.get("cmd.add_if_min"));
+        removeGreaterBtn.setText(lang.get("cmd.remove_greater"));
+        removeLowerBtn.setText(lang.get("cmd.remove_lower"));
+        countByStudioBtn.setText(lang.get("cmd.count_by_studio"));
+        // filterParticipantsBtn.setText(lang.get("cmd.filter"));
+        executeScriptBtn.setText(lang.get("cmd.execute_script"));
+        
+        // Меню
+        if (languageMenu != null) languageMenu.setText(lang.get("menu.language"));
+        
+        // Пользователь с ID
+        userLabel.setText(lang.get("main.currentUser") + " " + mainApp.getCurrentLogin() + 
+            " (id=" + mainApp.getCurrentUserId() + ")");
+        
+        // Таблица
+        idCol.setText(lang.get("table.id"));
+        nameCol.setText(lang.get("table.name"));
+        participantsCol.setText(lang.get("table.participants"));
+        albumsCol.setText(lang.get("table.albums"));
+        genreCol.setText(lang.get("table.genre"));
+        ownerCol.setText(lang.get("table.owner"));
+        singlesCol.setText(lang.get("table.singles"));
+        studioCol.setText(lang.get("table.studio"));
+        creationDateCol.setText(lang.get("table.creationDate"));
+        filterField.setPromptText(lang.get("main.filter.prompt"));
     }
     
     private void refreshData() {
         new Thread(() -> {
             try {
-                CommandRequest request = new CommandRequest("show", 
-                    mainApp.getCurrentLogin(), mainApp.getCurrentPassword());
-                CommandResponse response = mainApp.getNetworkClient().sendCommand(request);
-                
-                if (response.isSuccess()) {
-                    List<MusicBand> bands = parseBandsFromResponse(response.getMessage());
-                    Platform.runLater(() -> {
-                        bandData.setAll(bands);
-                        drawBands();
-                    });
-                } else {
-                    Platform.runLater(() -> showError("Ошибка", response.getMessage()));
-                }
-            } catch (Exception e) {
-                Platform.runLater(() -> showError("Ошибка", e.getMessage()));
-            }
-        }).start();
-    }
-    
-    private void drawBands() {
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        
-        for (MusicBand band : bandData) {
-            double x = band.getCoordinates().getX();
-            double y = band.getCoordinates().getY();
-            double size = 10 + band.getNumberOfParticipants() / 4;
-            Color color = getColorForOwner(band.getOwnerId());
-            
-            gc.setFill(color);
-            gc.fillOval(x, y, size, size);             
-            gc.setFill(Color.BLACK);
-            gc.fillText(band.getName(), x, y - 5);
-        }
-    }
-    
-    private Color getColorForOwner(int ownerId) {
-        if (ownerId == mainApp.getCurrentUserId()) {
-            return Color.LIGHTGREEN;
-        }
-        double hue = (ownerId * 137) % 360;
-        double saturation = 0.6;
-        double brightness = 0.9;
-        
-        return Color.hsb(hue, saturation, brightness);
-    }
-    
-    // adding
-    private void showAddDialog() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/add_dialog.fxml"));
-            Parent root = loader.load();
-            AddDialogController controller = loader.getController();
-            Stage dialogStage = new Stage();
-            dialogStage.setTitle("Добавление группы");
-            dialogStage.initModality(Modality.WINDOW_MODAL);
-            dialogStage.initOwner(mainApp.getPrimaryStage());
-            dialogStage.setScene(new Scene(root, 500, 400));
-            
-            controller.setDialogStage(dialogStage);
-            
-            dialogStage.showAndWait();
-            
-            if (controller.isConfirmed()) {
-                MusicBand newBand = controller.getResultBand();
-                sendAddCommand(newBand);
-            }
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-            showError("Ошибка", "Не удалось открыть диалог добавления");
-        }
-    }
-
-    private void sendAddCommand(MusicBand band) {
-        new Thread(() -> {
-            try {
-                MusicBandParser parser = new MusicBandParser();
-                String bandData = parser.toCsv(band);
-                
-                CommandRequest request = new CommandRequest("add", 
-                    new Object[]{bandData}, 
-                    mainApp.getCurrentLogin(), 
-                    mainApp.getCurrentPassword());
-                
-                CommandResponse response = mainApp.getNetworkClient().sendCommand(request);
-                
+                List<MusicBand> bands = dataParser.parseShowResponse(bandService.show());
                 Platform.runLater(() -> {
-                    if (response.isSuccess()) {
-                        refreshData();
-                    } else {
-                        showError("Ошибка", response.getMessage());
-                    }
+                    tableManager.setData(bands);
+                    // bandDrawer.draw(bands);
+                    animationManager.render();
+                    // if (onComplete != null) {
+                    //     onComplete.run();
+                    // }
                 });
             } catch (Exception e) {
-                Platform.runLater(() -> showError("Ошибка", e.getMessage()));
+                Platform.runLater(() -> dialogManager.showError(e.getMessage()));
             }
         }).start();
     }
+    
+    private void showInfo() {
+        new Thread(() -> {
+            try {
+                String info = dataParser.parseInfoResponse(bandService.info());
+                Platform.runLater(() -> dialogManager.showInfo(lang.get("cmd.info"), info));
+            } catch (Exception e) {
+                Platform.runLater(() -> dialogManager.showError(e.getMessage()));
+            }
+        }).start();
+    }
+    
+    // !!!!!!!
+    // private void refreshData() {
+    //     refreshData(null);
+    // }
 
-    // editing
-    private void editSelectedBand() {
-        MusicBand selected = bandsTable.getSelectionModel().getSelectedItem();
+    // private void showAddDialog() {
+    //     dialogManager.showAddDialog(band -> {
+    //         new Thread(() -> {
+    //             try {
+    //                 bandService.add(band);
+    //                 Platform.runLater(() -> {
+    //                     refreshData(() -> {
+    //                         MusicBand addedBand = findBandByName(band.getName());
+    //                         if (addedBand != null) {
+    //                             double x = addedBand.getCoordinates().getX();
+    //                             double y = addedBand.getCoordinates().getY();
+    //                             double size = 10 + addedBand.getNumberOfParticipants() / 4;
+    //                             Color color = bandDrawer.getColorForOwner(mainApp.getCurrentUserId());
+    //                             animationManager.startAddAnimation(addedBand, x, y, size, color, null);
+    //                         }
+    //                     });
+    //                 });
+    //             } catch (Exception e) {
+    //                 Platform.runLater(() -> dialogManager.showError(e.getMessage()));
+    //             }
+    //         }).start();
+    //     });
+    // }
+
+
+    // private void showAddDialog() {
+    //     dialogManager.showAddDialog(band -> {
+    //         new Thread(() -> {
+    //             try {
+    //                 bandService.add(band);
+    //                 Platform.runLater(() -> {
+    //                     refreshData();
+    //                     MusicBand addedBand = findBandByName(band.getName());
+    //                     if (addedBand != null) {
+    //                         double x = addedBand.getCoordinates().getX();
+    //                         double y = addedBand.getCoordinates().getY();
+    //                         double size = 10 + addedBand.getNumberOfParticipants() / 4;
+    //                         Color color = bandDrawer.getColorForOwner(mainApp.getCurrentUserId());
+                            
+    //                         animationManager.startAddAnimation(addedBand, x, y, size, color, null);
+    //                     }
+    //                 });
+    //             } catch (Exception e) {
+    //                 Platform.runLater(() -> dialogManager.showError(e.getMessage()));
+    //             }
+    //         }).start();
+    //     });
+    // }
+
+    private void showAddDialog() {
+        dialogManager.showAddDialog(band -> {
+            new Thread(() -> {
+                try {
+                    bandService.add(band);
+                    Platform.runLater(() -> {
+                        // Анимация сразу, без ожидания refreshData
+                        double x = band.getCoordinates().getX();
+                        double y = band.getCoordinates().getY();
+                        double size = 10 + band.getNumberOfParticipants() / 4;
+                        Color color = bandDrawer.getColorForOwner(mainApp.getCurrentUserId());
+                        
+                        // Создаём временный объект для анимации
+                        MusicBand tempBand = new MusicBand(
+                            band.getName(),
+                            band.getCoordinates(),
+                            band.getNumberOfParticipants(),
+                            band.getAlbumsCount(),
+                            band.getGenre(),
+                            band.getStudio(),
+                            band.getSinglesCount()
+                        );
+                        tempBand.setId(-1);
+                        tempBand.setCoordinates(band.getCoordinates());
+                        tempBand.setNumberOfParticipants(band.getNumberOfParticipants());
+                        tempBand.setName(band.getName());
+                        tempBand.setOwnerId(mainApp.getCurrentUserId());
+                        
+                        animationManager.startAddAnimation(tempBand, x, y, size, color, () -> {
+                            refreshData();  // после анимации обновляем данные
+                        });
+                    });
+                } catch (Exception e) {
+                    Platform.runLater(() -> dialogManager.showError(e.getMessage()));
+                }
+            }).start();
+        });
+    }
+
+    // private void showAddDialog() {
+    //     dialogManager.showAddDialog(band -> {
+    //         new Thread(() -> {
+    //             try {
+    //                 bandService.add(band);
+    //                 Thread.sleep(500);  // ждём полсекунды, чтобы сервер успел обработать
+    //                 Platform.runLater(() -> {
+    //                     refreshData();
+    //                     // Даём время на отрисовку
+    //                     Platform.runLater(() -> {
+    //                         MusicBand addedBand = findBandByName(band.getName());
+    //                         if (addedBand != null) {
+    //                             double x = addedBand.getCoordinates().getX();
+    //                             double y = addedBand.getCoordinates().getY();
+    //                             double size = 10 + addedBand.getNumberOfParticipants() / 4;
+    //                             Color color = bandDrawer.getColorForOwner(mainApp.getCurrentUserId());
+    //                             animationManager.startAddAnimation(addedBand, x, y, size, color, null);
+    //                         }
+    //                     });
+    //                 });
+    //             } catch (Exception e) {
+    //                 Platform.runLater(() -> dialogManager.showError(e.getMessage()));
+    //             }
+    //         }).start();
+    //     });
+    // }
+    
+    private void showAddIfMinDialog() {
+        dialogManager.showAddIfMinDialog(band -> {
+            new Thread(() -> {
+                try {
+                    bandService.addIfMin(band);
+                    Platform.runLater(() -> refreshData());
+                } catch (Exception e) {
+                    Platform.runLater(() -> dialogManager.showError(e.getMessage()));
+                }
+            }).start();
+        });
+    }
+    
+    private void editSelected() {
+        MusicBand selected = tableManager.getSelected();
         if (selected == null) {
-            showError("Ошибка", "Выберите объект для редактирования");
+            dialogManager.showError(lang.get("error.noSelection"));
             return;
         }
         if (selected.getOwnerId() != mainApp.getCurrentUserId()) {
-            showError("Ошибка", "Вы можете редактировать только свои объекты");
+            dialogManager.showError(lang.get("error.notOwner"));
             return;
         }
-        showEditDialogForBand(selected);
-    }
-
-    private void showEditDialogForBand(MusicBand band) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/edit_dialog.fxml"));
-            Parent root = loader.load();
-            
-            EditDialogController controller = loader.getController();
-            
-            Stage dialogStage = new Stage();
-            dialogStage.setTitle("Редактирование группы");
-            dialogStage.initModality(Modality.WINDOW_MODAL);
-            dialogStage.initOwner(mainApp.getPrimaryStage());
-            dialogStage.setScene(new Scene(root, 500, 450));
-            dialogStage.setResizable(false);
-            
-            controller.setDialogStage(dialogStage);
-            controller.setBand(band);
-            
-            dialogStage.showAndWait();
-            
-            if (controller.isSaved()) {
-                sendUpdateCommand(band.getId(), controller.getUpdatedBand());
-            }
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-            showError("Ошибка", "Не удалось открыть диалог редактирования: " + e.getMessage());
-        }
-    }
-
-    private void sendUpdateCommand(int id, MusicBand updatedBand) {
-        new Thread(() -> {
-            try {
-                MusicBandParser parser = new MusicBandParser();
-                String bandData = parser.toCsv(updatedBand);
-                
-                CommandRequest request = new CommandRequest("update", 
-                    new Object[]{id, bandData}, 
-                    mainApp.getCurrentLogin(), 
-                    mainApp.getCurrentPassword());
-                
-                CommandResponse response = mainApp.getNetworkClient().sendCommand(request);
-                
-                Platform.runLater(() -> {
-                    if (response.isSuccess()) {
-                        refreshData();
-                    } else {
-                        showError("Ошибка", response.getMessage());
-                    }
-                });
-            } catch (Exception e) {
-                Platform.runLater(() -> showError("Ошибка", e.getMessage()));
-            }
-        }).start();
+        dialogManager.showEditDialog(selected, updatedBand -> {
+            new Thread(() -> {
+                try {
+                    bandService.update(selected.getId(), updatedBand);
+                    Platform.runLater(() -> refreshData());
+                } catch (Exception e) {
+                    Platform.runLater(() -> dialogManager.showError(e.getMessage()));
+                }
+            }).start();
+        });
     }
     
-    private void deleteSelectedBand() {
-        MusicBand selected = bandsTable.getSelectionModel().getSelectedItem();
+    private void deleteSelected() {
+        MusicBand selected = tableManager.getSelected();
         if (selected == null) {
-            showError("Ошибка", "Выберите объект для удаления");
+            dialogManager.showError(lang.get("error.noSelection"));
             return;
         }
-        
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Подтверждение");
-        confirm.setContentText("Удалить группу \"" + selected.getName() + "\"?");
-        
-        confirm.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK) {
+
+        if (selected.getOwnerId() != mainApp.getCurrentUserId()) {
+            dialogManager.showError(lang.get("error.notOwner"));
+            return;
+        }
+
+        if (dialogManager.showConfirmDialog(lang.get("cmd.delete"), 
+                "Удалить \"" + selected.getName() + "\"?")) {
+            new Thread(() -> {
+                try {
+                    bandService.removeById(selected.getId());
+                    Platform.runLater(() -> refreshData());
+                } catch (Exception e) {
+                    Platform.runLater(() -> dialogManager.showError(e.getMessage()));
+                }
+            }).start();
+        }
+    }
+    
+    private void showRemoveGreaterDialog() {
+        dialogManager.showRemoveGreaterDialog(band -> {
+            new Thread(() -> {
+                try {
+                    bandService.removeGreater(band);
+                    Platform.runLater(() -> refreshData());
+                } catch (Exception e) {
+                    Platform.runLater(() -> dialogManager.showError(e.getMessage()));
+                }
+            }).start();
+        });
+    }
+    
+    private void showRemoveLowerDialog() {
+        dialogManager.showRemoveLowerDialog(band -> {
+            new Thread(() -> {
+                try {
+                    bandService.removeLower(band);
+                    Platform.runLater(() -> refreshData());
+                } catch (Exception e) {
+                    Platform.runLater(() -> dialogManager.showError(e.getMessage()));
+                }
+            }).start();
+        });
+    }
+    
+    private void showCountByStudioDialog() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle(lang.get("cmd.count_by_studio"));
+        dialog.setHeaderText(lang.get("dialog.studio.name"));
+        dialog.setContentText(lang.get("dialog.studio.name"));
+        dialog.showAndWait().ifPresent(studioName -> {
+            if (!studioName.trim().isEmpty()) {
                 new Thread(() -> {
                     try {
-                        CommandRequest request = new CommandRequest("remove_by_id", 
-                            new Object[]{selected.getId()}, 
-                            mainApp.getCurrentLogin(), 
-                            mainApp.getCurrentPassword());
-                        CommandResponse resp = mainApp.getNetworkClient().sendCommand(request);
-                        Platform.runLater(() -> {
-                            if (resp.isSuccess()) {
-                                refreshData();
-                            } else {
-                                showError("Ошибка", resp.getMessage());
-                            }
-                        });
+                        int count = dataParser.parseCountResponse(bandService.countByStudio(studioName.trim()));
+                        Platform.runLater(() -> dialogManager.showInfo(lang.get("cmd.count_by_studio"),
+                            java.text.MessageFormat.format(lang.get("msg.studioCount"), studioName, count)));
                     } catch (Exception e) {
-                        Platform.runLater(() -> showError("Ошибка", e.getMessage()));
+                        Platform.runLater(() -> dialogManager.showError(e.getMessage()));
                     }
                 }).start();
             }
@@ -314,90 +396,104 @@ public class MainController {
     }
     
     private void clearCollection() {
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Подтверждение");
-        confirm.setContentText("Очистить всю коллекцию?");
-        confirm.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK) {
-                new Thread(() -> {
-                    try {
-                        CommandRequest request = new CommandRequest("clear", 
-                            mainApp.getCurrentLogin(), mainApp.getCurrentPassword());
-                        CommandResponse resp = mainApp.getNetworkClient().sendCommand(request);
-                        Platform.runLater(() -> {
-                            if (resp.isSuccess()) {
-                                refreshData();
-                            } else {
-                                showError("Ошибка", resp.getMessage());
-                            }
-                        });
-                    } catch (Exception e) {
-                        Platform.runLater(() -> showError("Ошибка", e.getMessage()));
-                    }
-                }).start();
+        if (dialogManager.showConfirmDialog(lang.get("cmd.clear"), lang.get("cmd.clear") + "?")) {
+            new Thread(() -> {
+                try {
+                    bandService.clear();
+                    Platform.runLater(() -> refreshData());
+                } catch (Exception e) {
+                    Platform.runLater(() -> dialogManager.showError(e.getMessage()));
+                }
+            }).start();
+        }
+    }
+    
+    private void executeScript() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle(lang.get("cmd.execute_script"));
+        dialog.setHeaderText("execute_script");
+        dialog.setContentText("File name:");
+        dialog.showAndWait().ifPresent(fileName -> {
+            if (!fileName.trim().isEmpty()) {
+                // TODO: Реализовать выполнение скрипта
+                dialogManager.showInfo(lang.get("cmd.execute_script"), "Executing script: " + fileName);
             }
         });
     }
     
     private void onCanvasClick(double x, double y) {
-        for (MusicBand band : bandData) {
-            double bandX = band.getCoordinates().getX();
-            double bandY = band.getCoordinates().getY();
-            double size = 30 + band.getNumberOfParticipants() / 2;
+        MusicBand band = bandDrawer.findBandAt(tableManager.getAllData(), x, y);
+        if (band != null) {
+            boolean isOwner = band.getOwnerId() == mainApp.getCurrentUserId();
+            String info = String.format("ID: %d\n%s: %s\n%s: %d\n%s: %d\n%s: %s\n%s: %s\n%s: %d",
+                band.getId(),
+                lang.get("table.name"), band.getName(),
+                lang.get("table.participants"), band.getNumberOfParticipants(),
+                lang.get("table.albums"), band.getAlbumsCount(),
+                lang.get("table.genre"), band.getGenre(),
+                lang.get("table.studio"), band.getStudio() != null ? band.getStudio().getName() : "-",
+                lang.get("table.owner"), band.getOwnerId());
             
-            if (x >= bandX && x <= bandX + size && y >= bandY && y <= bandY + size) {
-                showBandInfo(band);
-                break;
+            if (isOwner) {
+                showBandInfoWithEditButton(band, info);
+                // dialogManager.showEditDialog(band, updatedBand -> {
+                //     new Thread(() -> {
+                //         try {
+                //             bandService.update(band.getId(), updatedBand);
+                //             Platform.runLater(() -> refreshData());
+                //         } catch (Exception e) {
+                //             Platform.runLater(() -> dialogManager.showError(e.getMessage()));
+                //         }
+                //     }).start();
+                // });
+            } else {
+                dialogManager.showInfo(lang.get("cmd.info"), info);
             }
         }
     }
-    
-    private void showBandInfo(MusicBand band) {
-        Alert info = new Alert(Alert.AlertType.INFORMATION);
-        info.setTitle("Информация о группе");
-        info.setHeaderText(band.getName());
-        info.setContentText(
-            "ID: " + band.getId() + "\n" +
-            "Участников: " + band.getNumberOfParticipants() + "\n" +
-            "Альбомов: " + band.getAlbumsCount() + "\n" +
-            "Жанр: " + band.getGenre() + "\n" +
-            "Студия: " + (band.getStudio() != null ? band.getStudio().getName() : "не указана") + "\n" +
-            "Владелец: " + band.getOwnerId()
-        );
-        info.showAndWait();
-    }
-    
-    private List<MusicBand> parseBandsFromResponse(String message) {
-        List<MusicBand> bands = new ArrayList<>();
-    
-        if (message == null || message.trim().isEmpty()) {
-            return bands;
-        }
+
+    private void showBandInfoWithEditButton(MusicBand band, String info) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(lang.get("cmd.info"));
+        alert.setHeaderText(band.getName());
+        alert.setContentText(info);
         
-        MusicBandParser parser = new MusicBandParser();
-        String[] lines = message.split("\n");
-        for (String line : lines) {
-            line = line.trim();
-            if (line.isEmpty()) continue;
-            
-            try {
-                MusicBand band = parser.parseFromString(line);
-                bands.add(band);
-            } catch (Exception e) {
-                System.err.println("Ошибка парсинга: " + line);
-                e.printStackTrace();
+        ButtonType editButton = new ButtonType(lang.get("cmd.edit"));
+        alert.getButtonTypes().setAll(editButton, ButtonType.CLOSE);
+        
+        alert.showAndWait().ifPresent(response -> {
+            if (response == editButton) {
+                // Открываем диалог редактирования
+                dialogManager.showEditDialog(band, updatedBand -> {
+                    new Thread(() -> {
+                        try {
+                            bandService.update(band.getId(), updatedBand);
+                            Platform.runLater(() -> refreshData());
+                        } catch (Exception e) {
+                            Platform.runLater(() -> dialogManager.showError(e.getMessage()));
+                        }
+                    }).start();
+                });
             }
-        }
-        
-        System.out.println("Parsed " + bands.size() + " bands");
-        return bands;
+        });
     }
     
-    private void showError(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+    // Переключение языков
+    public void setRussian() { changeLanguage(new Locale("ru")); }
+    public void setEnglish() { changeLanguage(new Locale("en")); }
+    public void setGerman() { changeLanguage(new Locale("de")); }
+    public void setItalian() { changeLanguage(new Locale("it")); }
+    
+    private void changeLanguage(Locale locale) {
+        lang.changeLocale(locale);
+        refreshTexts();
+        dialogManager.showInfo(lang.get("menu.language"), "Language changed to " + locale.getDisplayName());
+    }
+
+    private MusicBand findBandByName(String name) {
+        return tableManager.getAllData().stream()
+            .filter(b -> b.getName().equals(name))
+            .findFirst()
+            .orElse(null);
     }
 }

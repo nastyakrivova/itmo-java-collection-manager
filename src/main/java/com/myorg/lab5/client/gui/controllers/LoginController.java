@@ -1,5 +1,9 @@
 package com.myorg.lab5.client.gui.controllers;
 
+import com.myorg.lab5.client.gui.utils_gui.LocalizationManager;
+
+import java.util.Locale;
+
 import com.myorg.lab5.client.gui.MainApp;
 import com.myorg.lab5.data_exchange.CommandRequest;
 import com.myorg.lab5.data_exchange.CommandResponse;
@@ -8,6 +12,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 
@@ -16,8 +21,13 @@ public class LoginController {
     @FXML private PasswordField passwordField;
     @FXML private Button loginBtn;
     @FXML private Button registerBtn;
+    @FXML private Label titleLabel;
+    @FXML private Label usernameLabel;
+    @FXML private Label passwordLabel;
 
     private MainApp mainApp;
+    private LocalizationManager lang = LocalizationManager.getInstance();
+
 
     public void setMainApp(MainApp mainApp){
         this.mainApp = mainApp;
@@ -25,6 +35,11 @@ public class LoginController {
 
     @FXML
     private void initialize() {
+
+        titleLabel.setText(lang.get("login.title"));
+        loginBtn.setText(lang.get("login.loginBtn"));
+        registerBtn.setText(lang.get("login.registerBtn"));
+
         loginBtn.setOnAction(e -> authenticate("login"));
         registerBtn.setOnAction(e -> authenticate("register"));
     }
@@ -84,5 +99,23 @@ public class LoginController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    public void setRussian() { changeLanguage(new Locale("ru")); }
+    public void setEnglish() { changeLanguage(new Locale("en")); }
+    public void setGerman() { changeLanguage(new Locale("de")); }
+    public void setItalian() { changeLanguage(new Locale("it")); }
+
+    private void changeLanguage(Locale locale) {
+        lang.changeLocale(locale);
+        refreshTexts();
+    }
+
+    public void refreshTexts() {
+        titleLabel.setText(lang.get("login.title"));
+        usernameLabel.setText(lang.get("login.username"));
+        passwordLabel.setText(lang.get("login.password"));
+        loginBtn.setText(lang.get("login.loginBtn"));
+        registerBtn.setText(lang.get("login.registerBtn"));
     }
 }

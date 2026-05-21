@@ -12,6 +12,9 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuItem?>
 
 <BorderPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
@@ -29,6 +32,14 @@
                 <Label fx:id="userLabel" style="-fx-text-fill: #2c3e50;"/>
                 <Pane HBox.hgrow="ALWAYS"/>  
                 <Button fx:id="refreshBtn" text="Обновить" style="-fx-background-color: #3498db; -fx-text-fill: white;"/>
+                <MenuBar>
+                    <Menu text="%menu.language">
+                        <MenuItem text="Русский" onAction="#setRussian"/>
+                        <MenuItem text="English" onAction="#setEnglish"/>
+                        <MenuItem text="Deutsch" onAction="#setGerman"/>
+                        <MenuItem text="Italiano" onAction="#setItalian"/>
+                    </Menu>
+                </MenuBar>
             </HBox>
 
             <HBox spacing="10" alignment="CENTER_LEFT">
@@ -66,18 +77,18 @@
     </center>
 
     <bottom>
-        <HBox spacing="10" style="-fx-background-color: white; -fx-border-color: #ddd; -fx-border-width: 1 0 0 0;">
-            <padding>
-                <Insets top="10" right="10" bottom="10" left="10"/>
-            </padding>
-
-            <Button fx:id="addBtn" text="Добавить" style="-fx-background-color: #C5E0B4; -fx-text-fill: #4A6B3A;"/>
-            <Button fx:id="editBtn" text="Редактировать" style="-fx-background-color: #F0D89C; -fx-text-fill: #8B6B3A;"/>
-            <Button fx:id="deleteBtn" text="Удалить" style="-fx-background-color: #E4B4B4; -fx-text-fill: #8B4A4A;"/>
-            <Button fx:id="clearBtn" text="Очистить" style="-fx-background-color: #C4C4E0; -fx-text-fill: #4A4A6B;"/>
-            <Pane HBox.hgrow="ALWAYS"/> 
-
-            <!-- <Label text="© MusicBand Manager" style="-fx-text-fill: #999; -fx-font-size: 11px;"/> -->
+        <HBox spacing="10" style="-fx-padding: 5 10 5 10;">
+            <Button fx:id="addBtn" text="%cmd.add"/>
+            <Button fx:id="editBtn" text="%cmd.edit"/>
+            <Button fx:id="deleteBtn" text="%cmd.delete"/>
+            <Button fx:id="clearBtn" text="%cmd.clear"/>
+            <Button fx:id="infoBtn" text="%cmd.info"/>
+            <Button fx:id="addIfMinBtn" text="%cmd.add_if_min"/>
+            <Button fx:id="removeGreaterBtn" text="%cmd.remove_greater"/>
+            <Button fx:id="removeLowerBtn" text="%cmd.remove_lower"/>
+            <Button fx:id="countByStudioBtn" text="%cmd.count_by_studio"/>
+            <!-- <Button fx:id="filterParticipantsBtn" text="%cmd.filter"/> -->
+            <Button fx:id="executeScriptBtn" text="%cmd.execute_script"/>
         </HBox>
     </bottom>
 

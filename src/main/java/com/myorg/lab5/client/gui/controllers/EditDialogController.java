@@ -66,6 +66,7 @@ public class EditDialogController {
     private void saveChanges() {
         try {
             // Валидация полей
+            int id = originalBand.getId();
             String name = nameField.getText().trim();
             if (name.isEmpty()) {
                 showError("Название не может быть пустым");

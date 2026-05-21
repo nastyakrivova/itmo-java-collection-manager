@@ -8,6 +8,9 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuItem?>
 
 <VBox xmlns="http://javafx.com/javafx/21"
       xmlns:fx="http://javafx.com/fxml/1"
@@ -16,13 +19,20 @@
       alignment="CENTER"
       style="-fx-padding: 20;">
 
-    <Label text="Авторизация" style="-fx-font-size: 20;"/>
+    <MenuBar>
+        <Menu text="Язык">
+            <MenuItem text="Русский" onAction="#setRussian"/>
+            <MenuItem text="English" onAction="#setEnglish"/>
+            <MenuItem text="Deutsch" onAction="#setGerman"/>
+            <MenuItem text="Italiano" onAction="#setItalian"/>
+        </Menu>
+    </MenuBar>
 
+    <Label fx:id="titleLabel" text="Авторизация" style="-fx-font-size: 20;"/>
     <GridPane hgap="10" vgap="10" alignment="CENTER">
-        <Label text="Логин:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <Label fx:id="usernameLabel" text="Логин:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
         <TextField fx:id="loginField" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="200"/>
-
-        <Label text="Пароль:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <Label fx:id="passwordLabel" text="Пароль:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
         <PasswordField fx:id="passwordField" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="200"/>
     </GridPane>
 

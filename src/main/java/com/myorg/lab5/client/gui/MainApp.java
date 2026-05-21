@@ -1,5 +1,8 @@
 package com.myorg.lab5.client.gui;
 
+import java.util.Locale;
+import java.util.ResourceBundle;
+
 import com.myorg.lab5.client.NetworkClient;
 import com.myorg.lab5.client.gui.controllers.LoginController;
 import com.myorg.lab5.client.gui.controllers.MainController;
@@ -25,7 +28,9 @@ public class MainApp extends Application{
     }
 
     private void showLoginWindow() throws Exception {
+        ResourceBundle bundle = ResourceBundle.getBundle("i18n/messages", new Locale("ru"));
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/login.fxml"));
+        loader.setResources(bundle);
         Parent root = loader.load();
 
         LoginController controller = loader.getController();
@@ -48,7 +53,9 @@ public class MainApp extends Application{
     }
 
     private void showMainWindow() throws Exception {
+        ResourceBundle bundle = ResourceBundle.getBundle("i18n/messages", new Locale("ru"));
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/main.fxml"));
+        loader.setResources(bundle);
         Parent root = loader.load();
         
         MainController controller = loader.getController();
