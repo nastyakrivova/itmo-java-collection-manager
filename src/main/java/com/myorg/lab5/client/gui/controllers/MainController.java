@@ -332,43 +332,6 @@ public class MainController {
         }
     }
     
-    // private void executeScript() {
-    //     TextInputDialog dialog = new TextInputDialog();
-    //     dialog.setTitle(lang.get("cmd.execute_script"));
-    //     dialog.setHeaderText("execute_script");
-    //     dialog.setContentText("File name:");
-    //     dialog.showAndWait().ifPresent(fileName -> {
-    //         if (!fileName.trim().isEmpty()) {
-    //             new Thread(() -> {
-    //                 try {
-    //                     CommandRequest request = new CommandRequest(
-    //                         "execute_script",
-    //                         new Object[]{fileName.trim()},
-    //                         mainApp.getCurrentLogin(),
-    //                         mainApp.getCurrentPassword()
-    //                     );
-                        
-    //                     CommandResponse response = mainApp.getNetworkClient().sendCommand(request);
-                        
-    //                     Platform.runLater(() -> {
-    //                         if (response.isSuccess()) {
-    //                             dialogManager.showInfo(
-    //                                 lang.get("cmd.execute_script"), 
-    //                                 response.getMessage()
-    //                             );
-    //                         } else {
-    //                             dialogManager.showError(response.getMessage());
-    //                         }
-    //                     });
-    //                 } catch (Exception e) {
-    //                     Platform.runLater(() -> 
-    //                         dialogManager.showError("Error: " + e.getMessage())
-    //                     );
-    //                 }
-    //             }).start();
-    //         }
-    //     });
-    // }
 
 
     @FXML
