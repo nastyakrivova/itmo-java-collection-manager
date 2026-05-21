@@ -3,7 +3,6 @@ package com.myorg.lab5.client.gui.utils_gui;
 import com.myorg.lab5.client.gui.MainApp;
 import com.myorg.lab5.client.gui.controllers.AddDialogController;
 import com.myorg.lab5.client.gui.controllers.EditDialogController;
-import com.myorg.lab5.client.gui.utils_gui.LocalizationManager;
 import com.myorg.lab5.model.MusicBand;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;

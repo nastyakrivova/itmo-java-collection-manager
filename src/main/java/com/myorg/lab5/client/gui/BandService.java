@@ -7,8 +7,6 @@ import com.myorg.lab5.data_exchange.CommandResponse;
 import com.myorg.lab5.model.MusicBand;
 import com.myorg.lab5.utils.MusicBandParser;
 
-import java.util.function.Supplier;
-
 public class BandService {
     private final MainApp mainApp;
     private final MusicBandParser parser = new MusicBandParser();
@@ -21,7 +19,6 @@ public class BandService {
     private String getLogin() { return mainApp.getCurrentLogin(); }
     private String getPassword() { return mainApp.getCurrentPassword(); }
     
-    // Базовый метод для всех команд
     private CommandResponse send(String commandName, Object[] args) throws Exception {
         CommandRequest request = new CommandRequest(commandName, args, getLogin(), getPassword());
         return getClient().sendCommand(request);
@@ -42,8 +39,7 @@ public class BandService {
     private CommandResponse sendWithString(String commandName, String value) throws Exception {
         return send(commandName, new Object[]{value});
     }
-    
-    // Команды (теперь очень короткие)
+
     public CommandResponse show() throws Exception { return sendSimple("show"); }
     public CommandResponse info() throws Exception { return sendSimple("info"); }
     public CommandResponse clear() throws Exception { return sendSimple("clear"); }
@@ -54,10 +50,8 @@ public class BandService {
     public CommandResponse removeLower(MusicBand band) throws Exception { return sendWithData("remove_lower", band); }
     
     public CommandResponse update(int id, MusicBand band) throws Exception {
-            System.out.println("Updating band id=" + id + ", name=" + band.getName());
-    // !!!!!!
+
             String bandData = parser.toCsv(band);
-            System.out.println("Sending CSV: " + bandData);
             
             return send("update", new Object[]{id, bandData});
     }

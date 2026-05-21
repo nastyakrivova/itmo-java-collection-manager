@@ -1,4 +1,1 @@
-help
-info
-add Caamp,100,200,5,15,POP,EMI,8
-show
+add Band977,210,220,81,84,SOUL,StudioG,19

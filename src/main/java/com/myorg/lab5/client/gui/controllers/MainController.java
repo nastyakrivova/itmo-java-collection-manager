@@ -1,30 +1,36 @@
 package com.myorg.lab5.client.gui.controllers;
 
 import com.myorg.lab5.client.gui.MainApp;
-import com.myorg.lab5.client.gui.drawing.AnimationHelper;
 import com.myorg.lab5.client.gui.drawing.AnimationManager;
 import com.myorg.lab5.client.gui.drawing.BandDrawer;
+import com.myorg.lab5.client.CommandBuilder;
+import com.myorg.lab5.client.Validator;
 import com.myorg.lab5.client.gui.BandService;
 import com.myorg.lab5.client.gui.utils_gui.DataParser;
 import com.myorg.lab5.client.gui.utils_gui.DialogManager;
 import com.myorg.lab5.client.gui.table.TableManager;
 import com.myorg.lab5.client.gui.utils_gui.LocalizationManager;
+import com.myorg.lab5.commands.ExecuteScriptCommand;
+import com.myorg.lab5.data_exchange.CommandRequest;
+import com.myorg.lab5.data_exchange.CommandResponse;
+import com.myorg.lab5.io.ConsoleManager;
 import com.myorg.lab5.model.MusicBand;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
+import java.util.Scanner;
 
 public class MainController {
     
-    // UI элементы
     @FXML private TableView<MusicBand> bandsTable;
     @FXML private TableColumn<MusicBand, Integer> idCol;
     @FXML private TableColumn<MusicBand, String> nameCol;
@@ -43,7 +49,6 @@ public class MainController {
     @FXML private Button countByStudioBtn, executeScriptBtn;
     @FXML private Menu languageMenu;
     
-    // Сервисы
     private MainApp mainApp;
     private BandService bandService;
     private DataParser dataParser;
@@ -51,6 +56,8 @@ public class MainController {
     private TableManager tableManager;
     private BandDrawer bandDrawer;
     private AnimationManager animationManager;
+    private ExecuteScriptCommand executeScriptCommand;
+    private CommandBuilder commandBuilder ;
     private LocalizationManager lang = LocalizationManager.getInstance();
     
     public void setMainApp(MainApp mainApp) {
@@ -68,6 +75,17 @@ public class MainController {
                 drawBand(gc, band);
             }
         });
+        Scanner dummyScanner = new Scanner(System.in);
+        ConsoleManager dummyConsoleManager = new ConsoleManager(dummyScanner);
+        Validator validator = new Validator();
+        
+        this.commandBuilder = new CommandBuilder(dummyConsoleManager, validator, dummyScanner);
+        this.executeScriptCommand = new ExecuteScriptCommand(
+            mainApp.getNetworkClient(),
+            commandBuilder,
+            mainApp.getCurrentLogin(), 
+            mainApp.getCurrentPassword() 
+        );
         
         refreshTexts();
         refreshData();
@@ -75,14 +93,12 @@ public class MainController {
     
     @FXML
     private void initialize() {
-        // Основные команды
         refreshBtn.setOnAction(e -> refreshData());
         addBtn.setOnAction(e -> showAddDialog());
         editBtn.setOnAction(e -> editSelected());
         deleteBtn.setOnAction(e -> deleteSelected());
         clearBtn.setOnAction(e -> clearCollection());
         
-        // Дополнительные команды
         infoBtn.setOnAction(e -> showInfo());
         addIfMinBtn.setOnAction(e -> showAddIfMinDialog());
         removeGreaterBtn.setOnAction(e -> showRemoveGreaterDialog());
@@ -106,7 +122,6 @@ public class MainController {
     }
     
     public void refreshTexts() {
-        // Кнопки
         refreshBtn.setText(lang.get("main.refresh"));
         addBtn.setText(lang.get("cmd.add"));
         editBtn.setText(lang.get("cmd.edit"));
@@ -117,17 +132,13 @@ public class MainController {
         removeGreaterBtn.setText(lang.get("cmd.remove_greater"));
         removeLowerBtn.setText(lang.get("cmd.remove_lower"));
         countByStudioBtn.setText(lang.get("cmd.count_by_studio"));
-        // filterParticipantsBtn.setText(lang.get("cmd.filter"));
         executeScriptBtn.setText(lang.get("cmd.execute_script"));
         
-        // Меню
         if (languageMenu != null) languageMenu.setText(lang.get("menu.language"));
         
-        // Пользователь с ID
         userLabel.setText(lang.get("main.currentUser") + " " + mainApp.getCurrentLogin() + 
             " (id=" + mainApp.getCurrentUserId() + ")");
         
-        // Таблица
         idCol.setText(lang.get("table.id"));
         nameCol.setText(lang.get("table.name"));
         participantsCol.setText(lang.get("table.participants"));
@@ -146,11 +157,7 @@ public class MainController {
                 List<MusicBand> bands = dataParser.parseShowResponse(bandService.show());
                 Platform.runLater(() -> {
                     tableManager.setData(bands);
-                    // bandDrawer.draw(bands);
                     animationManager.render();
-                    // if (onComplete != null) {
-                    //     onComplete.run();
-                    // }
                 });
             } catch (Exception e) {
                 Platform.runLater(() -> dialogManager.showError(e.getMessage()));
@@ -169,73 +176,17 @@ public class MainController {
         }).start();
     }
     
-    // !!!!!!!
-    // private void refreshData() {
-    //     refreshData(null);
-    // }
-
-    // private void showAddDialog() {
-    //     dialogManager.showAddDialog(band -> {
-    //         new Thread(() -> {
-    //             try {
-    //                 bandService.add(band);
-    //                 Platform.runLater(() -> {
-    //                     refreshData(() -> {
-    //                         MusicBand addedBand = findBandByName(band.getName());
-    //                         if (addedBand != null) {
-    //                             double x = addedBand.getCoordinates().getX();
-    //                             double y = addedBand.getCoordinates().getY();
-    //                             double size = 10 + addedBand.getNumberOfParticipants() / 4;
-    //                             Color color = bandDrawer.getColorForOwner(mainApp.getCurrentUserId());
-    //                             animationManager.startAddAnimation(addedBand, x, y, size, color, null);
-    //                         }
-    //                     });
-    //                 });
-    //             } catch (Exception e) {
-    //                 Platform.runLater(() -> dialogManager.showError(e.getMessage()));
-    //             }
-    //         }).start();
-    //     });
-    // }
-
-
-    // private void showAddDialog() {
-    //     dialogManager.showAddDialog(band -> {
-    //         new Thread(() -> {
-    //             try {
-    //                 bandService.add(band);
-    //                 Platform.runLater(() -> {
-    //                     refreshData();
-    //                     MusicBand addedBand = findBandByName(band.getName());
-    //                     if (addedBand != null) {
-    //                         double x = addedBand.getCoordinates().getX();
-    //                         double y = addedBand.getCoordinates().getY();
-    //                         double size = 10 + addedBand.getNumberOfParticipants() / 4;
-    //                         Color color = bandDrawer.getColorForOwner(mainApp.getCurrentUserId());
-                            
-    //                         animationManager.startAddAnimation(addedBand, x, y, size, color, null);
-    //                     }
-    //                 });
-    //             } catch (Exception e) {
-    //                 Platform.runLater(() -> dialogManager.showError(e.getMessage()));
-    //             }
-    //         }).start();
-    //     });
-    // }
-
     private void showAddDialog() {
         dialogManager.showAddDialog(band -> {
             new Thread(() -> {
                 try {
                     bandService.add(band);
                     Platform.runLater(() -> {
-                        // Анимация сразу, без ожидания refreshData
                         double x = band.getCoordinates().getX();
                         double y = band.getCoordinates().getY();
                         double size = 10 + band.getNumberOfParticipants() / 4;
                         Color color = bandDrawer.getColorForOwner(mainApp.getCurrentUserId());
                         
-                        // Создаём временный объект для анимации
                         MusicBand tempBand = new MusicBand(
                             band.getName(),
                             band.getCoordinates(),
@@ -252,7 +203,7 @@ public class MainController {
                         tempBand.setOwnerId(mainApp.getCurrentUserId());
                         
                         animationManager.startAddAnimation(tempBand, x, y, size, color, () -> {
-                            refreshData();  // после анимации обновляем данные
+                            refreshData();
                         });
                     });
                 } catch (Exception e) {
@@ -261,33 +212,6 @@ public class MainController {
             }).start();
         });
     }
-
-    // private void showAddDialog() {
-    //     dialogManager.showAddDialog(band -> {
-    //         new Thread(() -> {
-    //             try {
-    //                 bandService.add(band);
-    //                 Thread.sleep(500);  // ждём полсекунды, чтобы сервер успел обработать
-    //                 Platform.runLater(() -> {
-    //                     refreshData();
-    //                     // Даём время на отрисовку
-    //                     Platform.runLater(() -> {
-    //                         MusicBand addedBand = findBandByName(band.getName());
-    //                         if (addedBand != null) {
-    //                             double x = addedBand.getCoordinates().getX();
-    //                             double y = addedBand.getCoordinates().getY();
-    //                             double size = 10 + addedBand.getNumberOfParticipants() / 4;
-    //                             Color color = bandDrawer.getColorForOwner(mainApp.getCurrentUserId());
-    //                             animationManager.startAddAnimation(addedBand, x, y, size, color, null);
-    //                         }
-    //                     });
-    //                 });
-    //             } catch (Exception e) {
-    //                 Platform.runLater(() -> dialogManager.showError(e.getMessage()));
-    //             }
-    //         }).start();
-    //     });
-    // }
     
     private void showAddIfMinDialog() {
         dialogManager.showAddIfMinDialog(band -> {
@@ -408,19 +332,74 @@ public class MainController {
         }
     }
     
+    // private void executeScript() {
+    //     TextInputDialog dialog = new TextInputDialog();
+    //     dialog.setTitle(lang.get("cmd.execute_script"));
+    //     dialog.setHeaderText("execute_script");
+    //     dialog.setContentText("File name:");
+    //     dialog.showAndWait().ifPresent(fileName -> {
+    //         if (!fileName.trim().isEmpty()) {
+    //             new Thread(() -> {
+    //                 try {
+    //                     CommandRequest request = new CommandRequest(
+    //                         "execute_script",
+    //                         new Object[]{fileName.trim()},
+    //                         mainApp.getCurrentLogin(),
+    //                         mainApp.getCurrentPassword()
+    //                     );
+                        
+    //                     CommandResponse response = mainApp.getNetworkClient().sendCommand(request);
+                        
+    //                     Platform.runLater(() -> {
+    //                         if (response.isSuccess()) {
+    //                             dialogManager.showInfo(
+    //                                 lang.get("cmd.execute_script"), 
+    //                                 response.getMessage()
+    //                             );
+    //                         } else {
+    //                             dialogManager.showError(response.getMessage());
+    //                         }
+    //                     });
+    //                 } catch (Exception e) {
+    //                     Platform.runLater(() -> 
+    //                         dialogManager.showError("Error: " + e.getMessage())
+    //                     );
+    //                 }
+    //             }).start();
+    //         }
+    //     });
+    // }
+
+
+    @FXML
     private void executeScript() {
-        TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle(lang.get("cmd.execute_script"));
-        dialog.setHeaderText("execute_script");
-        dialog.setContentText("File name:");
-        dialog.showAndWait().ifPresent(fileName -> {
-            if (!fileName.trim().isEmpty()) {
-                // TODO: Реализовать выполнение скрипта
-                dialogManager.showInfo(lang.get("cmd.execute_script"), "Executing script: " + fileName);
-            }
-        });
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Select Script File");
+        fileChooser.getExtensionFilters().add(
+            new FileChooser.ExtensionFilter("Script files (*.txt)", "*.txt")
+        );
+        
+        File selectedFile = fileChooser.showOpenDialog(mainApp.getPrimaryStage());
+        
+        if (selectedFile != null) {
+            String filePath = selectedFile.getAbsolutePath();
+            
+            new Thread(() -> {
+                try {
+                    executeScriptCommand.execute(filePath);
+                    
+                    Platform.runLater(() -> 
+                        dialogManager.showInfo("Script", "Script executed successfully")
+                    );
+                } catch (Exception e) {
+                    Platform.runLater(() -> 
+                        dialogManager.showError("Script Error" + e.getMessage())
+                    );
+                }
+            }).start();
+        }
     }
-    
+
     private void onCanvasClick(double x, double y) {
         MusicBand band = bandDrawer.findBandAt(tableManager.getAllData(), x, y);
         if (band != null) {
@@ -436,16 +415,6 @@ public class MainController {
             
             if (isOwner) {
                 showBandInfoWithEditButton(band, info);
-                // dialogManager.showEditDialog(band, updatedBand -> {
-                //     new Thread(() -> {
-                //         try {
-                //             bandService.update(band.getId(), updatedBand);
-                //             Platform.runLater(() -> refreshData());
-                //         } catch (Exception e) {
-                //             Platform.runLater(() -> dialogManager.showError(e.getMessage()));
-                //         }
-                //     }).start();
-                // });
             } else {
                 dialogManager.showInfo(lang.get("cmd.info"), info);
             }
@@ -463,7 +432,6 @@ public class MainController {
         
         alert.showAndWait().ifPresent(response -> {
             if (response == editButton) {
-                // Открываем диалог редактирования
                 dialogManager.showEditDialog(band, updatedBand -> {
                     new Thread(() -> {
                         try {
@@ -478,7 +446,6 @@ public class MainController {
         });
     }
     
-    // Переключение языков
     public void setRussian() { changeLanguage(new Locale("ru")); }
     public void setEnglish() { changeLanguage(new Locale("en")); }
     public void setGerman() { changeLanguage(new Locale("de")); }
@@ -490,10 +457,10 @@ public class MainController {
         dialogManager.showInfo(lang.get("menu.language"), "Language changed to " + locale.getDisplayName());
     }
 
-    private MusicBand findBandByName(String name) {
-        return tableManager.getAllData().stream()
-            .filter(b -> b.getName().equals(name))
-            .findFirst()
-            .orElse(null);
-    }
+    // private MusicBand findBandByName(String name) {
+    //     return tableManager.getAllData().stream()
+    //         .filter(b -> b.getName().equals(name))
+    //         .findFirst()
+    //         .orElse(null);
+    // }
 }

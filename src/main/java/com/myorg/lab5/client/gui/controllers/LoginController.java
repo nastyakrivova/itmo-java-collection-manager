@@ -59,8 +59,6 @@ public class LoginController {
                     if (response.isSuccess()){
                         int userId = extractUserId(response.getMessage());
                         try {
-                            // int userId = extractUserId(response.getMessage());
-                            // mainApp.loginSuccess(login, passord, userId);
                             mainApp.loginSuccess(login, password, userId);
                         } catch (Exception e) {
                             showError("Ошибка", e.getMessage());

@@ -11,6 +11,7 @@ public class LocalizationManager {
     private LocalizationManager() {
         currentLocale = new Locale("ru");
         bundle = ResourceBundle.getBundle("i18n/messages", currentLocale);
+        
     }
     
     public static LocalizationManager getInstance() {
