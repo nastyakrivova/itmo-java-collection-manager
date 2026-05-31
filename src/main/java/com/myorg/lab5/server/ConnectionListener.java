@@ -7,6 +7,7 @@ import java.nio.channels.DatagramChannel;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -21,6 +22,11 @@ import com.myorg.lab5.data_exchange.SerializationUtil;
 public class ConnectionListener {
 
     private static final Logger logger = LogManager.getLogger(ServerMain.class);
+
+    private final AtomicLong totalRequests = new AtomicLong(0);
+    private final AtomicLong totalTimeNanos = new AtomicLong(0);
+    private long minTimeNanos = Long.MAX_VALUE;
+    private long maxTimeNanos = 0;
 
     private final RequestReader requestReader;
     private final CommandExecutor commandExecutor;
@@ -42,7 +48,32 @@ public class ConnectionListener {
         this.channel = channel;
 
         int cores = Runtime.getRuntime().availableProcessors();
-        this.readingPool = Executors.newFixedThreadPool(cores*2);
+
+        String poolType = System.getenv().getOrDefault("POOL_TYPE", "fixed").trim();
+        String poolSizeStr = System.getenv().getOrDefault("POOL_SIZE", String.valueOf(cores * 2)).trim();
+        int poolSize = Integer.parseInt(poolSizeStr);
+        logger.info("Конфигурация пула: type={}, size={}", poolType, poolSize);
+
+        ExecutorService processingPool;
+        switch (poolType) {
+            case "cached":
+                processingPool = Executors.newCachedThreadPool();
+                logger.info("Используем CachedThreadPool");
+                break;
+            case "workstealing":
+                processingPool = Executors.newWorkStealingPool(poolSize);
+                logger.info("Используем WorkStealingPool с размером {}", poolSize);
+                break;
+            case "fixed":
+            default:
+                processingPool = Executors.newFixedThreadPool(poolSize);
+                logger.info("Используем FixedThreadPool с размером {}", poolSize);
+                break;
+        }
+        
+        this.readingPool = processingPool;
+
+        
         this.responsePool = ForkJoinPool.commonPool();
         logger.info("ConnectionListener initialized with {} processing threads", cores * 2);
     }
@@ -79,6 +110,7 @@ public class ConnectionListener {
     }
 
     private void processRequest(byte[] data, SocketAddress clientAddress){
+        long start = System.nanoTime();
         try{
             logger.info("[{}] Начало обработки запроса от {}", 
                 Thread.currentThread().getName(), clientAddress);
@@ -106,10 +138,33 @@ public class ConnectionListener {
             }
         }catch (Exception e) {
             logger.error("Error handling request: " + e.getMessage());
+        }finally {
+            long duration = System.nanoTime() - start;
+            totalRequests.incrementAndGet();
+            totalTimeNanos.addAndGet(duration);
+
+            synchronized(this) {
+                if (duration < minTimeNanos) minTimeNanos = duration;
+                if (duration > maxTimeNanos) maxTimeNanos = duration;
+            }
         }
     }
 
     public void stop(){
         running = false;
+    }
+
+    public void printStats() {
+        long count = totalRequests.get();
+        if (count  == 0) return;
+
+        double avgMs = (totalTimeNanos.get() / count) / 1_000_000.0;
+        System.out.println("СТАТИСТИКА ПУЛА ПОТОКОВ");
+        System.out.println("  Обработано запросов: " + count);
+        System.out.println("  Среднее время: " + avgMs + " мс");
+        System.out.println("  Мин. время: " + (minTimeNanos / 1_000_000.0) + " мс");
+        System.out.println("  Макс. время: " + (maxTimeNanos / 1_000_000.0) + " мс");
+        System.out.println("  Пропускная способность: " + (count * 1000 / (totalTimeNanos.get() / 1_000_000)) + " req/сек");
+
     }
 }
