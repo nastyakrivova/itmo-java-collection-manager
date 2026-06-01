@@ -1,0 +1,45 @@
+package com.myorg.lab7.commands;
+
+import com.myorg.lab7.model.CollectionManager;
+import com.myorg.lab7.model.MusicBand;
+import com.myorg.lab7.utils.ScriptParser;
+
+public class AddCommand implements Command {
+    private final CollectionManager collectionManager;
+    private final ScriptParser parser = new ScriptParser();
+
+    public AddCommand(CollectionManager collectionManager) {
+        this.collectionManager = collectionManager;
+    }
+    
+    @Override
+    public void execute(String[] args, int userId) {
+        if (args == null || args.length == 0) {
+            System.out.println("Error: No band data provided");
+            return;
+        }
+
+        try {
+            String bandData = args[0];
+            MusicBand band = parser.parse(bandData);
+            if (band == null) {
+                System.out.println("Error: Invalid band data format");
+                return;
+            }
+
+            boolean success = collectionManager.add(band, userId);
+            if (success) {
+                System.out.println("Band added successfully with ID: " + band.getId());
+            } else {
+                System.out.println("Error: Failed to add band");
+            }
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public String getDescription() {
+        return "- Add a new element to the collection";
+    }
+}

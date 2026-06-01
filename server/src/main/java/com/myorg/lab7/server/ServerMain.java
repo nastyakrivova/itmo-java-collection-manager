@@ -1,0 +1,102 @@
+package com.myorg.lab7.server;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.channels.DatagramChannel;
+import java.util.Collection;
+import java.util.Scanner;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.myorg.lab7.commands.AddCommand;
+import com.myorg.lab7.commands.AddIfMinCommand;
+import com.myorg.lab7.commands.CheckUpdateCommand;
+import com.myorg.lab7.commands.ClearCommand;
+import com.myorg.lab7.commands.CommandManager;
+import com.myorg.lab7.commands.CountByStudioCommand;
+// import com.myorg.lab7.commands.ExecuteScriptCommand;
+import com.myorg.lab7.commands.HelpCommand;
+import com.myorg.lab7.commands.InfoCommand;
+import com.myorg.lab7.commands.MyShowCommand;
+import com.myorg.lab7.commands.PrintDescendingCommand;
+import com.myorg.lab7.commands.FilterLessThenNumOfPart;
+import com.myorg.lab7.commands.RemoveById;
+import com.myorg.lab7.commands.RemoveGreaterCommand;
+import com.myorg.lab7.commands.RemoveLowerCommand;
+import com.myorg.lab7.commands.ShowCommand;
+import com.myorg.lab7.commands.UpdateIdCommand;
+import com.myorg.lab7.model.CollectionManager;
+import com.myorg.lab7.model.MusicBand;
+import com.myorg.lab7.utils.MusicBandParser;
+
+
+public class ServerMain {
+    private static final int PORT = 9807;
+    private static final Logger logger = LogManager.getLogger(ServerMain.class);
+    public static void main(String[] args){
+        logger.info("Server initialization...\n");
+
+        try{
+
+            String dbUrlLocal = "jdbc:postgresql://localhost:5432/testlab7";
+            String dbUserLocal = "postgres";
+            String dbPasswordLocal = "3013";
+            DBManager dbManager = new DBManager(dbUrlLocal, dbUserLocal, dbPasswordLocal);
+
+
+            CollectionManager collectionManager = new CollectionManager(dbManager);
+            CommandManager commandManager = createCommandManager(collectionManager);
+
+            collectionManager.loadFromDB();
+            logger.info("Loaded {} items", collectionManager.getList().size());
+
+            RequestReader requestReader = new RequestReader();
+            CommandExecutor commandExecutor = new CommandExecutor(commandManager, dbManager);
+
+            DatagramChannel channel = DatagramChannel.open();
+            channel.configureBlocking(false);
+            channel.bind(new InetSocketAddress(PORT));
+            logger.info("Server started on port {} in non-blocking mode", PORT);
+            ResponseSender responseSender = new ResponseSender(channel);
+
+            ConnectionListener connectionListener = new ConnectionListener(channel, requestReader, commandExecutor, responseSender);
+
+
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                logger.info("Finishing...");
+                connectionListener.printStats();
+                connectionListener.stop();
+            }));
+
+            connectionListener.start();
+        }catch (IOException e) {
+            logger.warn("Can't upload the file: " + e.getMessage());
+            logger.warn("Start with empty collection");
+        } catch (Exception e) {
+            logger.error("Unexpected error", e);
+        }
+    }
+
+    private static CommandManager createCommandManager(CollectionManager collectionManager){
+        CommandManager commandManager = new CommandManager();
+
+        commandManager.register("help", new HelpCommand(commandManager));
+        commandManager.register("info", new InfoCommand(collectionManager));
+        commandManager.register("show", new ShowCommand(collectionManager));
+        commandManager.register("clear", new ClearCommand(collectionManager));
+        commandManager.register("add", new AddCommand(collectionManager));
+        commandManager.register("add_if_min", new AddIfMinCommand(collectionManager));
+        commandManager.register("update", new UpdateIdCommand(collectionManager));
+        commandManager.register("check_update", new CheckUpdateCommand(collectionManager));       
+        commandManager.register("remove_by_id", new RemoveById(collectionManager));
+        commandManager.register("remove_greater", new RemoveGreaterCommand(collectionManager));
+        commandManager.register("remove_lower", new RemoveLowerCommand(collectionManager));
+        commandManager.register("count_by_studio", new CountByStudioCommand(collectionManager));
+        commandManager.register("filter_less_than_number_of_participants", new FilterLessThenNumOfPart(collectionManager));
+        commandManager.register("print_descending", new PrintDescendingCommand(collectionManager));
+        commandManager.register("my_show", new MyShowCommand(collectionManager));
+
+        return commandManager;
+    }
+}
