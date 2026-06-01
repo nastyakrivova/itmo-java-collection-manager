@@ -39,10 +39,10 @@ public class ServerMain {
 
         try{
 
-            String dbUrlLocal = "jdbc:postgresql://localhost:5432/testlab7";
-            String dbUserLocal = "postgres";
-            String dbPasswordLocal = "3013";
-            DBManager dbManager = new DBManager(dbUrlLocal, dbUserLocal, dbPasswordLocal);
+            String dbUrl = "jdbc:postgresql://pg/studs";
+            String dbUser = "s502501";
+            String dbPassword = "vxTj72Ecz4qlSlv6";
+            DBManager dbManager = new DBManager(dbUrl, dbUser, dbPassword);
 
 
             CollectionManager collectionManager = new CollectionManager(dbManager);
